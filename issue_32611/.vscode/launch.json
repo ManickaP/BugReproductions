@@ -9,9 +9,8 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.0/issue_32611.dll",
-            "args": [],
+            "program": "${workspaceFolder}/bin/${input:configuration}/netcoreapp3.0/issue_32611.dll",
+            "args": [ "--filter", "Program" ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
@@ -22,6 +21,18 @@
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickProcess}"
+        }
+    ],
+    "inputs": [
+        {
+          "type": "pickString",
+          "id": "configuration",
+          "description": "Do you want to build Debug or Release version?",
+          "options": [
+            "Debug",
+            "Release"
+          ],
+          "default": "Debug"
         }
     ]
 }
