@@ -6,7 +6,7 @@ namespace issue_32611
 {
     class Program
     {
-        /*static void Main(string[] args)
+        static void Main(string[] args)
         {
             string hostname = Dns.GetHostName();
             Console.WriteLine("My hostname is '{0}'", hostname);
@@ -14,6 +14,6 @@ namespace issue_32611
             foreach (var address in Dns.GetHostAddresses(hostname)) {
                 Console.WriteLine("\t{0}", address);
             }
-        }*/
+        }
     }
 }

@@ -30,12 +30,10 @@ public class Program
     [DllImport("libc")]
     unsafe static extern void freeifaddrs(void* ifa);
 
-    static void Main(string[] args) {
-        //BenchmarkSwitcher.FromTypes(new[] { typeof(Program) }).Run(args);
-        foreach (var addr in new Program().getifaddrs()) {
+    //static void Main(string[] args) => BenchmarkSwitcher.FromTypes(new[] { typeof(Program) }).Run(args);
+        /*foreach (var addr in new Program().getifaddrs()) {
             Console.WriteLine(addr);
-        }
-    } 
+        }*/
 
     [Benchmark]
     public IPAddress[] GetHostAddresses() => Dns.GetHostAddresses(Dns.GetHostName());
