@@ -1,6 +1,7 @@
 syntax: glob
 *.suo
 *.user
+*.exe
 .vs/
 bin/
 obj/
