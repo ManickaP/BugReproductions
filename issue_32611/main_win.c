@@ -2,11 +2,80 @@
 #include <stdlib.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#include <iphlpapi.h>
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600
+#endif
+
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "iphlpapi.lib")
 
 #define HOSTNAME_LEN 255
 
+
+void print_adapter(PIP_ADAPTER_ADDRESSES aa)
+{
+	char buf[BUFSIZ];
+	memset(buf, 0, BUFSIZ);
+	WideCharToMultiByte(CP_ACP, 0, aa->FriendlyName, wcslen(aa->FriendlyName), buf, BUFSIZ, NULL, NULL);
+	printf("adapter_name:%s\n", buf);
+}
+
+void print_addr(PIP_ADAPTER_UNICAST_ADDRESS ua)
+{
+	char buf[BUFSIZ];
+
+	int family = ua->Address.lpSockaddr->sa_family;
+	printf("\t%s ",  family == AF_INET ? "IPv4":"IPv6");
+
+	memset(buf, 0, BUFSIZ);
+	getnameinfo(ua->Address.lpSockaddr, ua->Address.iSockaddrLength, buf, sizeof(buf), NULL, 0,NI_NUMERICHOST);
+	printf("%s\n", buf);	
+}
+
+int print_ipaddress()
+{
+	DWORD rv, size;
+	PIP_ADAPTER_ADDRESSES adapter_addresses, aa;
+	PIP_ADAPTER_UNICAST_ADDRESS ua;
+
+	rv = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, NULL, &size);
+	if (rv != ERROR_BUFFER_OVERFLOW) {
+		fprintf(stderr, "GetAdaptersAddresses() failed...");
+		return 0;
+	}
+	adapter_addresses = (PIP_ADAPTER_ADDRESSES)malloc(size);
+
+	rv = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, NULL, adapter_addresses, &size);
+	if (rv != ERROR_SUCCESS) {
+		fprintf(stderr, "GetAdaptersAddresses() failed...");
+		free(adapter_addresses);
+		return 0;
+	}
+
+	for (aa = adapter_addresses; aa != NULL; aa = aa->Next) {
+		print_adapter(aa);
+		for (ua = aa->FirstUnicastAddress; ua != NULL; ua = ua->Next) {
+			print_addr(ua);
+		}
+	}
+
+	free(adapter_addresses);
+    return 1;
+}
+
+
 void main()
 {
+    WSADATA wsa;	
+	printf("\nInitialising Winsock...");
+	if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
+	{
+		printf("Failed. Error Code : %d",WSAGetLastError());
+		return 1;
+	}
+
     // ----- getaddrinfo -----
     char *my_hostname = malloc(HOSTNAME_LEN);
     struct addrinfo hint;
@@ -34,7 +103,6 @@ void main()
         printf("Error in getaddrinfo() %d\n", result);
         return;
     }
-    printf("booooo");
 
     printf("My IP addresses are:\n");
     for (struct addrinfo *ai = info; ai != NULL; ai = ai->ai_next)
@@ -45,52 +113,8 @@ void main()
     }
     // ----- getaddrinfo -----
 
-    printf("booooo");
-    // ----- getifaddrs -----
-    struct ifaddrs *ifaddr, *ifa;
-    int family, s;
-    char host[NI_MAXHOST];
-
-    if (getifaddrs(&ifaddr) == -1)
-    {
-        perror("getifaddrs");
-        exit(EXIT_FAILURE);
-    }
-
-    /* Walk through linked list, maintaining head pointer so we
-       can free list later */
-
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        if (ifa->ifa_addr == NULL)
-            continue;
-
-        family = ifa->ifa_addr->sa_family;
-
-        /* Display interface name and family (including symbolic
-           form of the latter for the common families) */
-
-        printf("%s  address family: %d%s\n",
-               ifa->ifa_name, family,
-               (family == AF_PACKET) ? " (AF_PACKET)" : (family == AF_INET) ? " (AF_INET)" : (family == AF_INET6) ? " (AF_INET6)" : "");
-
-        /* For an AF_INET* interface address, display the address */
-
-        if (family == AF_INET || family == AF_INET6)
-        {
-            s = getnameinfo(ifa->ifa_addr,
-                            (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
-                            host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-            if (s != 0)
-            {
-                printf("getnameinfo() failed: %s\n", gai_strerror(s));
-                exit(EXIT_FAILURE);
-            }
-            printf("\taddress: <%s>\n", host);
-        }
-    }
-
-    freeifaddrs(ifaddr);
-    exit(EXIT_SUCCESS);
+    // ----- getifaddrs ----- 
+    print_ipaddress();
+	return 0;
     // ----- getifaddrs -----
 }

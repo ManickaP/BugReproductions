@@ -27,7 +27,7 @@
           "$gcc"
         ],
         "group": "build",
-        //"dependsOn": [ "vcvars" ]
+        "dependsOn": [ "vcvars" ]
       },
       {
         "type": "shell",
