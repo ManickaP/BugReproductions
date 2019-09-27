@@ -25,9 +25,3 @@
 |                      |   192.168.0.103 (Ethernet)                       |   fe80::5940:d69b:c568:aa44%eth1 (eth1)          |   fe80::c79b:99ea:f48a:8f05%enp3s0 (enp3s0)      |
 |                      |   ::1 (Loopback)                                 |   127.0.0.1 (lo)                                 |                                                  |
 |                      |   127.0.0.1 (Loopback)                           |   ::1 (lo)                                       |                                                  |
-
-* getaddrinfo takes primarily data from /etc/hosts, if there is no record for current machine name than it fails (since the name obviously is not recognized by DNS)
-* mono gives better error message:
-System.Net.Sockets.SocketException (0x80004005): Could not resolve host 'manicka'
-System.Net.Internals.SocketExceptionFactory+ExtendedSocketException (00000005, 0xFFFDFFFF): Name or service not known
-* getaddrinfo on Windows ignores system32/etc/hosts
