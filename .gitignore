@@ -5,3 +5,4 @@ syntax: glob
 .vs/
 bin/
 obj/
+BenchmarkDotNet.Artifacts/
