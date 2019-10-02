@@ -44,7 +44,12 @@ void main()
     printf("My IP addresses are:\n");
     for (struct addrinfo *ai = info; ai != NULL; ai = ai->ai_next)
     {
-        void *addr = ai->ai_family == AF_INET ? &(((struct sockaddr_in *)ai->ai_addr)->sin_addr) : &(((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr);
+        void *addr;
+        if (ai->ai_family == AF_INET) {
+            addr = &(((struct sockaddr_in *)ai->ai_addr)->sin_addr);
+        } else {
+            addr = &(((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr);
+        }
         inet_ntop(ai->ai_family, addr, ipstr, sizeof(ipstr));
         printf("\t%s\n", ipstr);
     }
@@ -83,18 +88,27 @@ void main()
 
         if (family == AF_INET || family == AF_INET6)
         {
-            s = getnameinfo(ifa->ifa_addr,
+            void *addr;
+            if (family == AF_INET) {
+                addr = &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr);
+            } else {
+                addr = &(((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr);
+            }
+            inet_ntop(family, addr, ipstr, sizeof(ipstr));
+
+            /*s = getnameinfo(ifa->ifa_addr,
                             (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
                             host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0)
             {
                 printf("getnameinfo() failed: %s\n", gai_strerror(s));
                 exit(EXIT_FAILURE);
-            }
-            printf("\taddress: <%s>\n", host);
+            }*/
+            printf("\taddress: <%s>\n", ipstr);
         }
     }
 
+    freeifaddrs(NULL);
     freeifaddrs(ifaddr);
     exit(EXIT_SUCCESS);
     // ----- getifaddrs -----

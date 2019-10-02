@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/bin/${input:configuration}/netcoreapp3.0/issue_32611.dll",
+            "program": "${workspaceFolder}/${input:project}/bin/${input:configuration}/netcoreapp3.0/issue_32611.dll",
             "args": [ "--filter", "Program" ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
@@ -33,6 +33,16 @@
             "Release"
           ],
           "default": "Debug"
+        },
+        {
+          "type": "pickString",
+          "id": "project",
+          "description": "Do you want to build Benchmarks or CSharpTests?",
+          "options": [
+            "Benchmarks",
+            "CSharpTests"
+          ],
+          "default": "CSharpTests"
         }
     ]
 }

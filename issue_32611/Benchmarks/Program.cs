@@ -11,6 +11,10 @@ namespace issue_32611
         static void Main(string[] args) => BenchmarkSwitcher.FromTypes(new[] { typeof(Program) }).Run(args);
 
         [Benchmark]
+        public string GetHostName() => Dns.GetHostName();
+
+
+        [Benchmark]
         public IPAddress[] GetHostAddresses() => Dns.GetHostAddresses(Dns.GetHostName());
 
         [Benchmark]
