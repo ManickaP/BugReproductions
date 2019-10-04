@@ -8,14 +8,24 @@ namespace issue_32611
 {
     public class Program
     {
+        public const string domainName = "ibm.com";
+
+        public const string knownDomainName = "microsoft.com";
+
         static void Main(string[] args) => BenchmarkSwitcher.FromTypes(new[] { typeof(Program) }).Run(args);
 
         [Benchmark]
         public string GetHostName() => Dns.GetHostName();
 
+        public IEnumerable<string> DomainNames() => new [] {
+            Dns.GetHostName(),
+            domainName,
+            knownDomainName
+        };
 
         [Benchmark]
-        public IPAddress[] GetHostAddresses() => Dns.GetHostAddresses(Dns.GetHostName());
+        [ArgumentsSource(nameof(DomainNames))]
+        public IPAddress[] GetHostAddresses(string hostName) => Dns.GetHostAddresses(hostName);
 
         [Benchmark]
         public IPAddress[] Adapters()
