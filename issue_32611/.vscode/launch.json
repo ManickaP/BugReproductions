@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/${input:project}/bin/${input:configuration}/netcoreapp3.0/issue_32611.dll",
             "args": [ "--filter", "Program" ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/${input:project}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false
