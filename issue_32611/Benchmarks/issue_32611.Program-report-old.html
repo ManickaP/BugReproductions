@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>issue_32611.Program-20191012-073533</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.11.5, OS=manjaro 
+Intel Core i7-4771 CPU 3.50GHz (Haswell), 1 CPU, 8 logical and 4 physical cores
+.NET Core SDK=3.0.100
+  [Host]     : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+  DefaultJob : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>    Method</th><th>hostName</th><th>     Mean</th><th>      Error</th><th>      StdDev</th>
+</tr>
+</thead><tbody><tr><td>GetHostName</td><td>?</td><td>514.2 ns</td><td>0.3218 ns</td><td>0.2687 ns</td>
+</tr><tr><td>Adapters</td><td>?</td><td>419,492.0 ns</td><td>1,913.5438 ns</td><td>1,696.3067 ns</td>
+</tr><tr><td>getifaddrs</td><td>?</td><td>38,414.2 ns</td><td>652.1102 ns</td><td>609.9843 ns</td>
+</tr><tr><td>GetHostAddresses</td><td>ibm.com</td><td>61,720,822.1 ns</td><td>6,473,770.2537 ns</td><td>17,279,803.3163 ns</td>
+</tr><tr><td>getaddrinfo</td><td>ibm.com</td><td>56,170,458.0 ns</td><td>9,132,016.0220 ns</td><td>24,998,746.4931 ns</td>
+</tr><tr><td>GetHostAddresses</td><td>manicka-pc</td><td>6,809.8 ns</td><td>11.0436 ns</td><td>9.7898 ns</td>
+</tr><tr><td>getaddrinfo</td><td>manicka-pc</td><td>6,522.0 ns</td><td>14.8964 ns</td><td>13.9341 ns</td>
+</tr><tr><td>GetHostAddresses</td><td>microsoft.com</td><td>6,599.8 ns</td><td>17.1592 ns</td><td>15.2112 ns</td>
+</tr><tr><td>getaddrinfo</td><td>microsoft.com</td><td>6,695.5 ns</td><td>32.1498 ns</td><td>30.0730 ns</td>
+</tr></tbody></table>
+</body>
+</html>

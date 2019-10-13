@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>issue_32611.Program-20191012-101524</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.11.5, OS=manjaro 
+Intel Core i7-4771 CPU 3.50GHz (Haswell), 1 CPU, 8 logical and 4 physical cores
+.NET Core SDK=3.0.100
+  [Host]     : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+  DefaultJob : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>    Method</th><th>hostName</th><th>     Mean</th><th>       Error</th><th>      StdDev</th><th>Gen 0</th><th>Gen 1</th><th>Gen 2</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>GetHostName</td><td>?</td><td>517.8 ns</td><td>0.9320 ns</td><td>0.8262 ns</td><td>0.0114</td><td>-</td><td>-</td><td>48 B</td>
+</tr><tr><td>Adapters</td><td>?</td><td>432,322.0 ns</td><td>1,217.8342 ns</td><td>1,139.1629 ns</td><td>41.9922</td><td>-</td><td>-</td><td>175856 B</td>
+</tr><tr><td>getifaddrs</td><td>?</td><td>38,567.2 ns</td><td>584.4116 ns</td><td>546.6589 ns</td><td>0.0610</td><td>-</td><td>-</td><td>384 B</td>
+</tr><tr><td>GetHostAddresses</td><td>ibm.com</td><td>20,454,778.0 ns</td><td>3,199,267.0539 ns</td><td>8,703,841.9695 ns</td><td>-</td><td>-</td><td>-</td><td>256 B</td>
+</tr><tr><td>getaddrinfo</td><td>ibm.com</td><td>74,604,466.5 ns</td><td>10,372,224.9521 ns</td><td>27,864,308.7862 ns</td><td>-</td><td>-</td><td>-</td><td>168 B</td>
+</tr><tr><td>GetHostAddresses</td><td>manicka-pc</td><td>79,925.5 ns</td><td>292.6660 ns</td><td>259.4408 ns</td><td>0.1221</td><td>-</td><td>-</td><td>984 B</td>
+</tr><tr><td>getaddrinfo</td><td>manicka-pc</td><td>79,429.5 ns</td><td>254.6815 ns</td><td>225.7685 ns</td><td>0.2441</td><td>-</td><td>-</td><td>1248 B</td>
+</tr><tr><td>GetHostAddresses</td><td>microsoft.com</td><td>7,291.8 ns</td><td>27.9021 ns</td><td>23.2995 ns</td><td>0.0610</td><td>-</td><td>-</td><td>264 B</td>
+</tr><tr><td>getaddrinfo</td><td>microsoft.com</td><td>7,015.1 ns</td><td>32.2712 ns</td><td>26.9480 ns</td><td>0.0381</td><td>-</td><td>-</td><td>168 B</td>
+</tr></tbody></table>
+</body>
+</html>

@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace issue_32611
 {
+    [MemoryDiagnoser]
     public class Program
     {
         public const string domainName = "ibm.com";
@@ -171,7 +172,7 @@ namespace issue_32611
                 else if (entry->ai_family == 10)
                 {
                     addresses[count] = new IPAddress(new ReadOnlySpan<byte>(entry->ai_addr->data + 4, 16));
-                    addresses[count].ScopeId = entry->ifa_addr->scope_id;
+                    //addresses[count].ScopeId = entry->ifa_addr->scope_id;
                     count++;
                 }
 
