@@ -41,6 +41,7 @@ void main()
         return;
     }
 
+    printf("%s\n", info->ai_canonname);
     printf("My IP addresses are:\n");
     for (struct addrinfo *ai = info; ai != NULL; ai = ai->ai_next)
     {
