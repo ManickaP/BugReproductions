@@ -27,7 +27,7 @@ namespace http_client_activity_missing
                 //using var responseStream = response.Content.ReadAsStream();
                 //using var reader = new StreamReader(responseStream);
                 //var data = await reader.ReadToEndAsync();
-                //Console.WriteLine($"{DateTime.UtcNow:HH:mm:ss.fffffff}Got response: {data.Length}");*/
+                //Console.WriteLine($"{DateTime.UtcNow:HH:mm:ss.fffffff}Got response: {data.Length}");
                 break;
             }
         }
