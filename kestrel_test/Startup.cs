@@ -30,8 +30,10 @@ namespace kestrel_test
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
+                endpoints.MapGet("/sendBytes", async context =>
                 {
+                    Console.WriteLine($"Query string: {context.Request.QueryString}");
+                    Console.WriteLine($"Length: {context.Request.Query["length"]}");
                     await context.Response.WriteAsync("Hello World!");
                 });
             });

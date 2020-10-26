@@ -11,23 +11,29 @@ namespace client_test
     {
         static async Task Main(string[] args)
         {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            // Old .NET Core 3.1 settings to allow H2C, replaced with VersionPolicy = HttpVersionPolicy.RequestVersionExact
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             var listener = new HttpEventListener();
+            // Not needed in clear text scenario, just a remnant of the original test.
             var handler = new HttpClientHandler()
             {
                 ServerCertificateCustomValidationCallback = delegate { return true; }
             };
             var client = new HttpClient(handler)
             {
-                DefaultRequestVersion = HttpVersion.Version20
+                DefaultRequestVersion = HttpVersion.Version20,
+                DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
             };
 
-            await client.GetAsync("http://localhost:5001");
+            using var response = await client.GetAsync("http://localhost:5001/sendBytes?length=123456789");
+            Console.WriteLine(response);
 
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5001")
+            // Old test of header frame sending.
+            /*var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5001")
             {
-                Version = HttpVersion.Version20
+                Version = HttpVersion.Version20,
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact
             };
             var oneKbString = new string('a', 1024);
             // The default frame size limit is 16kb, and the total server header size limit is 32kb.
@@ -38,7 +44,7 @@ namespace client_test
             var result = await client.SendAsync(request);
 
             Console.WriteLine(request);
-            Console.WriteLine(result);
+            Console.WriteLine(result);*/
         }
     }
 
@@ -47,7 +53,7 @@ namespace client_test
 
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
-            if (eventSource.Name == "Microsoft-System-Net-Http")
+            if (eventSource.Name == "Private.InternalDiagnostics.System.Net.Http")
                 EnableEvents(eventSource, EventLevel.LogAlways);
         }
 
