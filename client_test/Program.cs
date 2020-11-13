@@ -3,6 +3,7 @@ using System.Diagnostics.Tracing;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace client_test
@@ -22,12 +23,27 @@ namespace client_test
             };
             var client = new HttpClient(handler)
             {
+                Timeout = TimeSpan.FromSeconds(1000),
                 DefaultRequestVersion = HttpVersion.Version20,
                 DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
             };
 
-            using var response = await client.GetAsync("http://localhost:5001/sendBytes?length=123456789");
-            Console.WriteLine(response);
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
+            try
+            {
+                using var response = await client.GetAsync("http://localhost:5001/sleepFor?seconds=100", cts.Token);
+                Console.WriteLine(response);
+            }
+            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+            {
+                // Handle timeout
+                Console.WriteLine(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             // Old test of header frame sending.
             /*var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5001")
