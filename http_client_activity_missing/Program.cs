@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics.Tracing;
@@ -21,8 +21,6 @@ namespace http_client_activity_missing
             Console.ReadKey();
             while (true)
             {
-                //await Task.Delay(10_000);
-                //http://corefx-net-http2.azurewebsites.net/EmptyContent.ashx 
                 var response = await client.GetAsync("https://github.com/runtime");
                 //using var response = await client.GetAsync(@"https://github.com/dotnet/runtime/blob/master/src/libraries/System.Net.Http/src/HttpDiagnosticsGuide.md", HttpCompletionOption.ResponseContentRead);
                 //Console.WriteLine($"{DateTime.UtcNow:HH:mm:ss.fffffff}Got response");
@@ -45,13 +43,9 @@ namespace http_client_activity_missing
             if (eventSource.Name == "System.Net.Http" ||
                 eventSource.Name == "System.Net.Sockets" ||
                 eventSource.Name == "System.Net.Security" ||
-                eventSource.Name == "System.Net.NameResolution"/* ||
-                eventSource.Name == "Private.InternalDiagnostics.System.Net.Sockets"*/)
+                eventSource.Name == "System.Net.NameResolution")
             {
-                EnableEvents(eventSource, EventLevel.LogAlways, EventKeywords.All, new Dictionary<string, string>()
-                {
-                    ["EventCounterIntervalSec"] = TimeSpan.FromSeconds(0.5).TotalSeconds.ToString()
-                });
+                EnableEvents(eventSource, EventLevel.LogAlways, EventKeywords.All);
             }
             else if (eventSource.Name == "System.Threading.Tasks.TplEventSource")
             {
