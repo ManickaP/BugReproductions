@@ -1,7 +1,10 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +36,12 @@ namespace kestrel_test
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapPost("/postFormUrlEncodedContent", async context =>
+                {
+                    using var streamReader = new StreamReader(context.Request.Body, Encoding.UTF8);
+                    var requestContent = await streamReader.ReadToEndAsync();
+                    await context.Response.WriteAsync(requestContent + requestContent, Encoding.UTF8);
+                });
                 endpoints.MapGet("/sendBytes", async context =>
                 {
                     Console.WriteLine($"Query string: {context.Request.QueryString}");
