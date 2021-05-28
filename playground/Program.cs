@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,6 +14,37 @@ namespace playground
 {
     class Program
     {
+        public static async Task Main(string[] args)
+        {
+            ValueTask x = default;
+            Console.WriteLine(x.IsCompletedSuccessfully);
+            await x.ConfigureAwait(false);
+            Console.WriteLine(x.IsCompletedSuccessfully);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static async Task GetCallingAssemblyFromAsyncMethod()
+        {
+            var returnedAssembly = await DoSomethingAsync();
+
+            Console.WriteLine(returnedAssembly.ToString());
+            var expectedAssembly = typeof(Program).Assembly;
+            Console.WriteLine(expectedAssembly.Equals(returnedAssembly));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static async Task<Assembly> DoSomethingAsync()
+        {
+            var callingAssembly = Assembly.GetCallingAssembly();
+            await Task.Delay(50);
+            return callingAssembly;
+        }
+
+        static void Main6(string[] args)
+        {
+            GetCallingAssemblyFromAsyncMethod().GetAwaiter().GetResult();
+        }
+
         static async Task Main5(string[] args)
         {
             var sw = Stopwatch.StartNew();
