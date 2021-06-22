@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -14,7 +16,23 @@ namespace playground
 {
     class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
+        {
+            var dico = new Dictionary<string, string>();
+            var content = new FormUrlEncodedContent(dico!);
+            Console.WriteLine(Dns.GetHostName());
+            foreach (var x in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
+            {
+                Console.WriteLine(x);
+            }
+            Console.WriteLine();
+            foreach (var x in Dns.GetHostEntry("localhost").AddressList)
+            {
+                Console.WriteLine(x);
+            }
+        }
+
+        static async Task Main7(string[] args)
         {
             ValueTask x = default;
             Console.WriteLine(x.IsCompletedSuccessfully);
