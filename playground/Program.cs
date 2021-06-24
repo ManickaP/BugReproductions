@@ -16,10 +16,19 @@ namespace playground
 {
     class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var dico = new Dictionary<string, string>();
-            var content = new FormUrlEncodedContent(dico!);
+            using var client = new HttpClient();
+            var message = new HttpRequestMessage(HttpMethod.Get, "http://github.com/dotnet/runtime/issues/42856");
+            message.Headers.Add("Cookie", "test1=1;test2=2;test3=3");
+            Console.WriteLine(message);
+            using var response = await client.SendAsync(message);
+            Console.WriteLine(response);
+        }
+
+        public static void Main8(string[] args)
+        {
+            Console.WriteLine(Environment.Version);
             Console.WriteLine(Dns.GetHostName());
             foreach (var x in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
             {
