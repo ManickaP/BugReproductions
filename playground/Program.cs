@@ -16,7 +16,16 @@ namespace playground
 {
     class Program
     {
+        private static string TraceId = null!;
         public static async Task Main(string[] args)
+        {
+            Console.WriteLine(TraceId);
+            TraceId = "";
+            Console.WriteLine(TraceId);
+            TraceId = "TraceId";
+            Console.WriteLine(TraceId);
+        }
+        public static async Task Main9(string[] args)
         {
             using var client = new HttpClient();
             var message = new HttpRequestMessage(HttpMethod.Get, "http://github.com/dotnet/runtime/issues/42856");
