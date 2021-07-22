@@ -11,13 +11,45 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace playground
 {
     class Program
     {
+        public static async Task Main()
+        {
+            Console.WriteLine("Exists Certs Name and Location");
+            Console.WriteLine("------ ----- -------------------------");
+
+            foreach (StoreLocation storeLocation in (StoreLocation[])
+                Enum.GetValues(typeof(StoreLocation)))
+            {
+                foreach (StoreName storeName in (StoreName[])
+                    Enum.GetValues(typeof(StoreName)))
+                {
+                    X509Store store = new X509Store(storeName, storeLocation);
+
+                    try
+                    {
+                        store.Open(OpenFlags.OpenExistingOnly);
+                        Console.WriteLine("Yes    {0,4}  {1}, {2}",
+                            store.Certificates.Count, store.Name, store.Location);
+                    }
+                    catch (CryptographicException)
+                    {
+                        Console.WriteLine("No           {0}, {1}",
+                            store.Name, store.Location);
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+
+
         private static string TraceId = null!;
-        public static async Task Main(string[] args)
+        public static async Task Main10(string[] args)
         {
             Console.WriteLine(TraceId);
             TraceId = "";
