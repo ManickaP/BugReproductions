@@ -13,12 +13,59 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Diagnostics.Tracing;
+using System.Text;
 
 namespace playground
 {
     class Program
     {
         public static async Task Main()
+        {
+            using var _ =  new HttpEventListener();
+            using HttpClient client = new HttpClient()
+            {
+                DefaultRequestVersion = HttpVersion.Version30,
+                DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact,
+            };
+            for (int i = 0; i < 2; ++i)
+            {
+                try
+                {
+                    using HttpResponseMessage response = await client.GetAsync("https://cloudflare-quic.com/");
+                    Console.WriteLine($"====={i}=====");
+                    Console.WriteLine(response);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"====={i}=====");
+                    Console.WriteLine(ex);
+                }
+            }
+        }
+
+        internal sealed class HttpEventListener : EventListener
+        {
+            protected override void OnEventSourceCreated(EventSource eventSource)
+            {
+                if (eventSource.Name == "Private.InternalDiagnostics.System.Net.Http" || eventSource.Name == "Private.InternalDiagnostics.System.Net.Quic")
+                    EnableEvents(eventSource, EventLevel.LogAlways);
+            }
+
+            protected override void OnEventWritten(EventWrittenEventArgs eventData)
+            {
+                var sb = new StringBuilder().Append($"{eventData.TimeStamp:HH:mm:ss.fffffff}[{eventData.EventName}] ");
+                for (int i = 0; i < eventData.Payload?.Count; i++)
+                {
+                    if (i > 0)
+                        sb.Append(", ");
+                    sb.Append(eventData.PayloadNames?[i]).Append(": ").Append(eventData.Payload[i]);
+                }
+                Console.WriteLine(sb.ToString());
+            }
+        }
+
+        public static async Task Main11()
         {
             Console.WriteLine("Exists Certs Name and Location");
             Console.WriteLine("------ ----- -------------------------");
