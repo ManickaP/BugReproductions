@@ -15,12 +15,39 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics.Tracing;
 using System.Text;
+using System.Net.Mail;
 
 namespace playground
 {
     class Program
     {
-        public static async Task Main()
+        static void Main(string[] args)
+        {
+            // display name accepts a name with \
+            var ok = new MailAddress("foo@foo.com", "Foo \\ Bar");
+            Console.WriteLine(ok.ToString());
+
+            try
+            {
+                // however, the generated address fails to round-trip
+                var fail1 = new MailAddress(ok.ToString());
+            }
+            catch (FormatException e)
+            {
+                Console.WriteLine($"Fail1: {e}");
+            }
+            try
+            {
+                // parsing an address from a string also fails for the same reason
+                var fail2 = new MailAddress("\"Foo \\ Bar\" <foo@foo.com>");
+            }
+            catch (FormatException e)
+            {
+                Console.WriteLine($"Fail2: {e.Message}");
+            }
+        }
+
+        public static async Task Main12()
         {
             using var _ =  new HttpEventListener();
             using HttpClient client = new HttpClient()
