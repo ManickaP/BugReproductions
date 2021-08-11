@@ -21,7 +21,18 @@ namespace playground
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync("https://google.com");
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine(responseContent);
+            }
+        }
+
+        static void Main13(string[] args)
         {
             // display name accepts a name with \
             var ok = new MailAddress("foo@foo.com", "Foo \\ Bar");
