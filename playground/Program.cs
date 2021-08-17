@@ -23,6 +23,91 @@ namespace playground
     {
         static async Task Main(string[] args)
         {
+            var x = new ResettableCompletionSource<uint>();
+            Console.WriteLine(x.ToString());
+        }
+        internal sealed class ResettableCompletionSource<T> : IValueTaskSource<T>, IValueTaskSource
+        {
+            private ManualResetValueTaskSourceCore<T> _valueTaskSource;
+
+            public ResettableCompletionSource()
+            {
+                _valueTaskSource.RunContinuationsAsynchronously = true;
+            }
+
+            public ValueTask<T> GetValueTask()
+            {
+                return new ValueTask<T>(this, _valueTaskSource.Version);
+            }
+
+            public ValueTask GetTypelessValueTask()
+            {
+                return new ValueTask(this, _valueTaskSource.Version);
+            }
+
+            public ValueTaskSourceStatus GetStatus(short token)
+            {
+                return _valueTaskSource.GetStatus(token);
+            }
+
+            public void OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
+            {
+                _valueTaskSource.OnCompleted(continuation, state, token, flags);
+            }
+
+            public void Complete(T result)
+            {
+                _valueTaskSource.SetResult(result);
+            }
+
+            public void CompleteException(Exception ex)
+            {
+                _valueTaskSource.SetException(ex);
+            }
+
+            public T GetResult(short token)
+            {
+                bool isValid = token == _valueTaskSource.Version;
+                try
+                {
+                    return _valueTaskSource.GetResult(token);
+                }
+                finally
+                {
+                    if (isValid)
+                    {
+                        _valueTaskSource.Reset();
+                    }
+                }
+            }
+
+            void IValueTaskSource.GetResult(short token)
+            {
+                bool isValid = token == _valueTaskSource.Version;
+                try
+                {
+                    _valueTaskSource.GetResult(token);
+                }
+                finally
+                {
+                    if (isValid)
+                    {
+                        _valueTaskSource.Reset();
+                    }
+                }
+            }
+
+            public override string ToString()
+            {
+                var t = _valueTaskSource.GetType();
+                var _completed = t.GetField("_completed", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_valueTaskSource);
+                var _result = t.GetField("_result", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_valueTaskSource);
+                var _error = t.GetField("_error", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_valueTaskSource);
+                return $"VTS {_valueTaskSource.Version} completed={_completed}, result={_result}, error={_error}";
+            }
+        }
+        static async Task Main14(string[] args)
+        {
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync("https://google.com");
