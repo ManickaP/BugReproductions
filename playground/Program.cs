@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -22,6 +23,22 @@ namespace playground
     class Program
     {
         static async Task Main(string[] args)
+        {
+            var client = new HttpClient(new SocketsHttpHandler()
+            {
+                SslOptions = new SslClientAuthenticationOptions()
+                {
+                    LocalCertificateSelectionCallback = (object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate? remoteCertificate, string[] acceptableIssuers) =>
+                    {
+                        Console.WriteLine("Client is selecting a local certificate.");
+                        return null;
+                    }
+                }
+            });
+            Console.WriteLine(await client.GetAsync("https://github.com/dotnet/runtime/"));
+        }
+
+        static async Task Main15(string[] args)
         {
             var x = new ResettableCompletionSource<uint>();
             Console.WriteLine(x.ToString());
