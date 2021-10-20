@@ -5,6 +5,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Quic;
+using System.Net.Security;
+using System.Collections.Generic;
 
 namespace client_test
 {
@@ -12,6 +15,19 @@ namespace client_test
     {
         static async Task Main(string[] args)
         {
+            /*var listener = new HttpEventListener();
+            var connection = new QuicConnection(new DnsEndPoint("localhost", 5001), new SslClientAuthenticationOptions(){
+                ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
+                RemoteCertificateValidationCallback = delegate { return true; }
+            });
+            Console.WriteLine("a");
+            await connection.ConnectAsync();
+            Console.WriteLine("b");
+            connection.Dispose();
+            Console.WriteLine("c");
+            listener.Dispose();*/
+
+
             // Old .NET Core 3.1 settings to allow H2C, replaced with VersionPolicy = HttpVersionPolicy.RequestVersionExact
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
@@ -24,15 +40,15 @@ namespace client_test
             var client = new HttpClient(handler)
             {
                 Timeout = TimeSpan.FromSeconds(1000),
-                DefaultRequestVersion = HttpVersion.Version20,
+                DefaultRequestVersion = HttpVersion.Version30,
                 DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
             };
 
             var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(10));
+            //cts.CancelAfter(TimeSpan.FromSeconds(10));
             try
             {
-                using var response = await client.GetAsync("http://localhost:5001/sleepFor?seconds=100", cts.Token);
+                using var response = await client.GetAsync("https://localhost:5001/sendBytes?length=1", cts.Token);
                 Console.WriteLine(response);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
@@ -69,7 +85,7 @@ namespace client_test
 
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
-            if (eventSource.Name == "Private.InternalDiagnostics.System.Net.Http")
+            if (eventSource.Name == "Private.InternalDiagnostics.System.Net.Quic")
                 EnableEvents(eventSource, EventLevel.LogAlways);
         }
 

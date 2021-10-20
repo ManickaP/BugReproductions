@@ -8,5 +8,10 @@
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Net.SocketsHttpHandler.Http3Support" Value="true" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Net.Quic">
+      <HintPath>/usr/share/dotnet/shared/Microsoft.NETCore.App/7.0.0-alpha.1.21480.1/System.Net.Quic.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>
