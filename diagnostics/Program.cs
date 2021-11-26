@@ -2,15 +2,70 @@
 using System.Diagnostics;
 using System.Net;
 
-using var listener = new HttpEventListener();
+//using var listener = new HttpEventListener();
 
-Console.WriteLine("Hello, World!");
 
-var client = new HttpClient(new SocketsHttpHandler() {
-    ActivityHeadersPropagator= DistributedContextPropagator.CreatePassThroughPropagator()
+// If you want the see the order of activities created, add ActivityListener.
+ActivitySource.AddActivityListener(new ActivityListener()
+{
+    ShouldListenTo = (activitySource) => true,
+    ActivityStarted = activity => Console.WriteLine($"Start {activity.DisplayName}{activity.Id}"),
+    ActivityStopped = activity => Console.WriteLine($"Stop {activity.DisplayName}{activity.Id}")
 });
+
+//Console.WriteLine("Hello, World!");
+
+// Set up headers propagator for this client.
+var client = new HttpClient(new SocketsHttpHandler() {
+    // -> Turns off activity creation as well as header injection
+    // ActivityHeadersPropagator = null
+
+    // -> Activity gets created but Request-Id header is not injected
+    // ActivityHeadersPropagator = DistributedContextPropagator.CreateNoOutputPropagator()
+
+    // -> Activity gets created, Request-Id header gets injected and contains "root" activity id
+    // ActivityHeadersPropagator = DistributedContextPropagator.CreatePassThroughPropagator()
+
+    // -> Activity gets created, Request-Id header gets injected and contains "parent" activity id
+    // ActivityHeadersPropagator = new SkipHttpClientActivityPropagator()
+
+    // -> Activity gets created, Request-Id header gets injected and contains "System.Net.Http.HttpRequestOut" activity id
+    // Same as not setting ActivityHeadersPropagator at all.
+    // ActivityHeadersPropagator = DistributedContextPropagator.CreateDefaultPropagator()
+});
+
+// Set up activities, at least two layers to show all the differences.
+using Activity root = new Activity("root");
+root.SetIdFormat(ActivityIdFormat.Hierarchical);
+root.Start();
 using Activity parent = new Activity("parent");
 parent.SetIdFormat(ActivityIdFormat.Hierarchical);
 parent.Start();
-var resp = await client.GetAsync("https://motherfuckingwebsite.com/");
-Console.WriteLine($"status: {resp.StatusCode}, version: {resp.Version}");
+
+var request = new HttpRequestMessage(HttpMethod.Get, "https://www.microsoft.com");
+
+using var response = await client.SendAsync(request);
+Console.WriteLine($"Request: {request}"); // Print the request to see the injected header
+
+public sealed class SkipHttpClientActivityPropagator : DistributedContextPropagator
+{
+    private readonly DistributedContextPropagator _originalPropagator = Current;
+
+    public override IReadOnlyCollection<string> Fields => _originalPropagator.Fields;
+
+    public override void Inject(Activity? activity, object? carrier, PropagatorSetterCallback? setter)
+    {
+        if (activity?.OperationName == "System.Net.Http.HttpRequestOut")
+        {
+            activity = activity.Parent;
+        }
+
+        _originalPropagator.Inject(activity, carrier, setter);
+    }
+
+    public override void ExtractTraceIdAndState(object? carrier, PropagatorGetterCallback? getter, out string? traceId, out string? traceState) =>
+        _originalPropagator.ExtractTraceIdAndState(carrier, getter, out traceId, out traceState);
+
+    public override IEnumerable<KeyValuePair<string, string?>>? ExtractBaggage(object? carrier, PropagatorGetterCallback? getter) =>
+        _originalPropagator.ExtractBaggage(carrier, getter);
+}
