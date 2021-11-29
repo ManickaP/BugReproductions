@@ -24,7 +24,7 @@ var client = new HttpClient(new SocketsHttpHandler() {
     // ActivityHeadersPropagator = DistributedContextPropagator.CreateNoOutputPropagator()
 
     // -> Activity gets created, Request-Id header gets injected and contains "root" activity id
-    // ActivityHeadersPropagator = DistributedContextPropagator.CreatePassThroughPropagator()
+    ActivityHeadersPropagator = DistributedContextPropagator.CreatePassThroughPropagator()
 
     // -> Activity gets created, Request-Id header gets injected and contains "parent" activity id
     // ActivityHeadersPropagator = new SkipHttpClientActivityPropagator()
@@ -36,7 +36,7 @@ var client = new HttpClient(new SocketsHttpHandler() {
 
 // Set up activities, at least two layers to show all the differences.
 using Activity root = new Activity("root");
-root.SetIdFormat(ActivityIdFormat.Hierarchical);
+root.SetIdFormat(ActivityIdFormat.W3C);
 root.Start();
 using Activity parent = new Activity("parent");
 parent.SetIdFormat(ActivityIdFormat.Hierarchical);
