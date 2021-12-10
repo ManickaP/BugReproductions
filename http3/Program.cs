@@ -3,17 +3,17 @@ using System.Diagnostics.Tracing;
 using System.Net;
 using System.Text;
 
-using var _ = new HttpEventListener();
-Console.WriteLine("Hello, World!");
+//using var _ = new HttpEventListener();
+
 var client = new HttpClient()
 {
     DefaultRequestVersion = HttpVersion.Version30,
     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
 };
-var resp = await client.GetAsync("https://msquic.net/");
+var resp = await client.GetAsync("https://quic.westus.cloudapp.azure.com/");
 Console.WriteLine($"status: {resp.StatusCode}, version: {resp.Version}");
 
-internal sealed class HttpEventListener : EventListener
+/*internal sealed class HttpEventListener : EventListener
 {
     protected override void OnEventSourceCreated(EventSource eventSource)
     {
@@ -33,4 +33,4 @@ internal sealed class HttpEventListener : EventListener
         }
         Console.WriteLine(sb.ToString());
     }
-}
+}*/
