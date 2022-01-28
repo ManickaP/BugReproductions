@@ -4,13 +4,29 @@ using System.Net;
 
 //using var listener = new HttpEventListener();
 
+var subscription = DiagnosticListener.AllListeners.Subscribe(new CallbackObserver<DiagnosticListener>(listener =>
+{
+    if (listener.Name == "HttpHandlerDiagnosticListener")
+    {
+        listener.Subscribe(new CallbackObserver<KeyValuePair<string, object?>>(value =>
+        {
+            Console.WriteLine("NEXT:");
+            Console.WriteLine($"Event: {value.Key} [{value.Value?.GetType().FullName}]{value.Value}");
+            if (Activity.Current != null) {
+                Console.WriteLine($"Activity: {Activity.Current.Id}");
+            }
+            Console.WriteLine();
+        }));
+    }
+}));
+
 
 // If you want the see the order of activities created, add ActivityListener.
 ActivitySource.AddActivityListener(new ActivityListener()
 {
     ShouldListenTo = (activitySource) => true,
-    ActivityStarted = activity => Console.WriteLine($"Start {activity.DisplayName}{activity.Id}"),
-    ActivityStopped = activity => Console.WriteLine($"Stop {activity.DisplayName}{activity.Id}")
+    ActivityStarted = activity => Console.WriteLine($"ACTIVITY: Start {activity.DisplayName}={activity.Id}"),
+    ActivityStopped = activity => Console.WriteLine($"ACTIVITY: Stop {activity.DisplayName}={activity.Id}")
 });
 
 //Console.WriteLine("Hello, World!");
@@ -38,9 +54,9 @@ var client = new HttpClient(new SocketsHttpHandler() {
 using Activity root = new Activity("root");
 root.SetIdFormat(ActivityIdFormat.W3C);
 root.Start();
-using Activity parent = new Activity("parent");
+/*using Activity parent = new Activity("parent");
 parent.SetIdFormat(ActivityIdFormat.Hierarchical);
-parent.Start();
+parent.Start();*/
 
 var request = new HttpRequestMessage(HttpMethod.Get, "https://www.microsoft.com");
 
@@ -68,4 +84,14 @@ public sealed class SkipHttpClientActivityPropagator : DistributedContextPropaga
 
     public override IEnumerable<KeyValuePair<string, string?>>? ExtractBaggage(object? carrier, PropagatorGetterCallback? getter) =>
         _originalPropagator.ExtractBaggage(carrier, getter);
+}
+
+public class CallbackObserver<T> : IObserver<T>
+{
+    public CallbackObserver(Action<T> callback) { _callback = callback; }
+    public void OnCompleted() { Console.WriteLine("COMPLETED"); }
+    public void OnError(Exception error) { Console.WriteLine("ERROR: " + error); }
+    public void OnNext(T value) { _callback(value); }
+
+    private Action<T> _callback;
 }
