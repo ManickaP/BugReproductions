@@ -17,12 +17,64 @@ using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics.Tracing;
 using System.Text;
 using System.Net.Mail;
+using System.IO;
 
 namespace playground
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo("ps", $"-Q");
+            psi.RedirectStandardOutput = true;
+            psi.RedirectStandardError = true;
+
+            Process? process;
+
+            try
+            {
+                process = Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Exception while trying to run 'ps' command", ex);
+            }
+
+            if (process == null)
+            {
+                throw new Exception("Could not create process 'ps'");
+            }
+
+            try
+            {
+                process.WaitForExit();
+
+                string output = process.StandardOutput.ReadToEnd();
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception($"Process 'ps' returned exit code {process.ExitCode}");
+                }
+
+                using StringReader sr = new StringReader(output);
+
+                while (true)
+                {
+                    string? line = sr.ReadLine();
+                    if (line == null)
+                    {
+                        break;
+                    }
+
+                    Console.WriteLine(line);
+                }
+            }
+            finally
+            {
+                process.Dispose();
+            }
+        }
+
+        static async Task Main16(string[] args)
         {
             var client = new HttpClient(new SocketsHttpHandler()
             {
