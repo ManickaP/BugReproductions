@@ -1,16 +1,23 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System.Diagnostics.Tracing;
 using System.Net;
+using System.Net.Security;
 using System.Text;
 
 //using var _ = new HttpEventListener();
 
-var client = new HttpClient()
+var client = new HttpClient(new SocketsHttpHandler()
+{
+    SslOptions = new SslClientAuthenticationOptions()
+    {
+        RemoteCertificateValidationCallback = delegate { return true; }
+    }
+})
 {
     DefaultRequestVersion = HttpVersion.Version30,
     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
 };
-var resp = await client.GetAsync("https://quic.westus.cloudapp.azure.com/");
+var resp = await client.GetAsync("https://localhost:5001/sendBytes?length=5");
 Console.WriteLine($"status: {resp.StatusCode}, version: {resp.Version}");
 
 /*internal sealed class HttpEventListener : EventListener
