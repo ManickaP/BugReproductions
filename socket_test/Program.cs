@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -12,7 +13,16 @@ namespace socket_test
     {
         static async Task Main(string[] args)
         {
-            await Task.WhenAll(RunServer(), RunClient());
+            var sw = Stopwatch.StartNew();
+            var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            try {
+                socket.Connect(new DnsEndPoint("github.com", 5000));
+            } catch {
+                Console.WriteLine(sw.Elapsed);
+                throw;
+            }
+
+            //await Task.WhenAll(RunServer(), RunClient());
         }
 
         static readonly TaskCompletionSource<IPEndPoint> serverEndpoint = new TaskCompletionSource<IPEndPoint>();
