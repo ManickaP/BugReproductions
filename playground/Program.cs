@@ -23,7 +23,30 @@ namespace playground
 {
     class Program
     {
-        static void Main(string[] args)
+        static unsafe void Main() {
+            String str = "foobar";
+            Console.WriteLine("As char*: ");
+            fixed (char* ptr1 = str) {
+                for (int i = 0; i <= str.Length; ++i) {
+                    Console.WriteLine($"{ptr1[i]} = {(int)ptr1[i]}");
+                }
+            }
+            Console.WriteLine("As sbyte*: ");
+            fixed (char* ptr2 = str) {
+                sbyte* ptr3 = (sbyte*)ptr2;
+                for (int i = 0; i < str.Length * 2; ++i) {
+                    Console.WriteLine($"{ptr3[i]} = {(int)ptr3[i]}");
+                }
+            }
+            Console.WriteLine("As marshalled IntPtr: ");
+            IntPtr ptr4 = Marshal.StringToCoTaskMemUTF8(str);
+            sbyte* ptr5 = (sbyte*)ptr4;
+            for (int i = 0; i <= str.Length; ++i) {
+                Console.WriteLine($"{ptr5[i]} = {(int)ptr5[i]}");
+            }
+            Marshal.FreeCoTaskMem(ptr4);
+        }
+        static void Main17(string[] args)
         {
             ProcessStartInfo psi = new ProcessStartInfo("ps", $"-Q");
             psi.RedirectStandardOutput = true;
