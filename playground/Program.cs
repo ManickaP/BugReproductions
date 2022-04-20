@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -23,7 +24,67 @@ namespace playground
 {
     class Program
     {
-        static unsafe void Main() {
+        static void Main() {
+            var dic = new Dictionary<int, object>();
+            var sw = new Stopwatch();
+
+            foreach (var x in Enumerable.Range(0, 200_000)) {
+                dic.Add(x, new object());
+            }
+            sw.Reset();
+            sw.Start();
+            for (int i = Int32.MaxValue; i >= Int32.MaxValue - 100; --i) {
+                dic.Add(i, new object());
+            }
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed);
+            dic.Clear();
+
+            foreach (var x in Enumerable.Range(0, 200_000)) {
+                dic.Add(x, new object());
+            }
+            sw.Reset();
+            sw.Start();
+            for (int i = Int32.MaxValue; i >= Int32.MaxValue - 100; --i) {
+                dic.Add(i, new object());
+            }
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed);
+            dic.Clear();
+
+            foreach (var x in Enumerable.Range(0, 2_000_000)) {
+                dic.Add(x, new object());
+            }
+            sw.Reset();
+            sw.Start();
+            for (int i = Int32.MaxValue; i >= Int32.MaxValue - 100; --i) {
+                dic.Add(i, new object());
+            }
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed);
+            dic.Clear();
+        }
+
+        private static async ValueTask FinishHandshakeAsync(TaskCompletionSource tcs) {
+            Console.WriteLine("a");
+            await Task.Yield();
+            Console.WriteLine("b");
+            await Task.Delay(1000);
+            Console.WriteLine("c");
+            await tcs.Task;
+            Console.WriteLine("d");
+        }
+        static unsafe void Main19() {
+            var tcs = new TaskCompletionSource();
+            var task = FinishHandshakeAsync(tcs);
+            Thread.Sleep(5000);
+            Console.WriteLine(task.IsCompleted);
+            tcs.TrySetResult();
+            Console.WriteLine(task.IsCompleted);
+            Thread.Sleep(5000);
+            Console.WriteLine(task.IsCompleted);
+        }
+        static unsafe void Main18() {
             String str = "foobar";
             Console.WriteLine("As char*: ");
             fixed (char* ptr1 = str) {
