@@ -13,15 +13,6 @@ namespace socket_test
     {
         static async Task Main(string[] args)
         {
-            var sw = Stopwatch.StartNew();
-            var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            try {
-                socket.Connect(new DnsEndPoint("github.com", 5000));
-            } catch {
-                Console.WriteLine(sw.Elapsed);
-                throw;
-            }
-
             //await Task.WhenAll(RunServer(), RunClient());
         }
 
@@ -29,10 +20,12 @@ namespace socket_test
 
         static async Task RunClient()
         {
-            var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            var socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
             socket.NoDelay = true;
             var endpoint = await serverEndpoint.Task;
+            Console.WriteLine("Client connecting to: " + endpoint);
             socket.Connect(endpoint);
+            Console.WriteLine("Client connected to: " + socket.RemoteEndPoint);
             var stream = new NetworkStream(socket, ownsSocket: true);
             await stream.WriteAsync(UTF8Encoding.UTF8.GetBytes("Ahoj"));
             var buffer = new byte[100];
@@ -46,9 +39,10 @@ namespace socket_test
         static async Task RunServer()
         {
             var listenSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            listenSocket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+            listenSocket.Bind(new IPEndPoint(IPAddress.IPv6Any, 0));
             listenSocket.Listen();
             serverEndpoint.SetResult(listenSocket.LocalEndPoint as IPEndPoint);
+            Console.WriteLine("Server listening on: " + listenSocket.LocalEndPoint);
             var socket = await listenSocket.AcceptAsync().ConfigureAwait(false);
             var stream = new NetworkStream(socket, ownsSocket: true);
             var buffer = new byte[100];
