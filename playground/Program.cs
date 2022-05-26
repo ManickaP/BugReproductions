@@ -24,7 +24,22 @@ namespace playground
 {
     class Program
     {
-        static async Task Main() {
+        public static async Task Main()
+        {
+            var test = new Test();
+            await test.M();
+        }
+
+        public static async Task Main23() {
+            var r = new ResettableValueTaskSource<int>();
+            r.TrySetResult(5);
+            if (r.TryGetValueTask(out ValueTask<int> vt))
+            {
+                Console.WriteLine(await vt);
+            }
+            await Main21();
+        }
+        static async Task Main22() {
             var channel = Channel.CreateUnbounded<int>(new UnboundedChannelOptions() {
                 SingleWriter = true
             });
@@ -832,8 +847,10 @@ namespace playground
 
     internal class ResettableValueTaskSource<T> : IValueTaskSource<T>, IValueTaskSource
     {
+        private static readonly TaskCompletionSource<T> s_completionSentinel = new TaskCompletionSource<T>();
         // None -> [TryGetValueTask] -> Awaiting -> [TrySetResult|TrySetException(final: false)] -> Completed -> [GetResult] -> None
-        //                                       -> [TrySetResult|TrySetException(final: true)] -> Final(never leaves this state)
+        // None -> [TrySetResult|TrySetException(final: false)] -> Completed -> [GetResult] -> None
+        // None|Awaiting -> [TrySetResult|TrySetException(final: true)] -> Final(never leaves this state)
         private const int StateNone = 0;
         private const int StateAwaiting = 1;
         private const int StateCompleted = 2;
@@ -841,37 +858,39 @@ namespace playground
         private int _state = StateNone;
         private ManualResetValueTaskSourceCore<T> _valueTaskSource;
         private CancellationTokenRegistration _cancellationRegistration;
+        private TaskCompletionSource<T>? _taskCompletionSource;
 
         public ResettableValueTaskSource(bool runContinuationsAsynchronously = true)
         {
             _valueTaskSource = new ManualResetValueTaskSourceCore<T>() { RunContinuationsAsynchronously = runContinuationsAsynchronously };
+            _cancellationRegistration = default;
+            _taskCompletionSource = default;
         }
 
-        private bool TryGetValueTask<TValueTask>(Func<TValueTask> createValueTask, out TValueTask valueTask, CancellationToken cancellationToken = default)
+        private bool TryGetValueTask<TValueTask>(Func<ResettableValueTaskSource<T>, TValueTask> createValueTask, out TValueTask valueTask, CancellationToken cancellationToken = default)
             where TValueTask : struct
         {
             // None -> Awaiting
             int state = Interlocked.CompareExchange(ref _state, StateAwaiting, StateNone);
-
-            if (state == StateNone)
+            if (state == StateNone || state == StateCompleted)
             {
-                valueTask = createValueTask();
+                valueTask = createValueTask(this);
 
-                // Register cancellation if the token can be cancelled.
-                if (cancellationToken.CanBeCanceled)
+                // Register cancellation if the token can be cancelled and the task is not completed yet.
+                if (cancellationToken.CanBeCanceled && state == StateNone)
                 {
-                    _cancellationRegistration = cancellationToken.Register(obj =>
+                    _cancellationRegistration = cancellationToken.UnsafeRegister(static (obj, cancellationToken) =>
                     {
-                        var (parent, token) = ((ResettableValueTaskSource<T>, CancellationToken))obj!;
-                        parent.TrySetException(new OperationCanceledException(token));
-                    }, (_valueTaskSource, cancellationToken));
+                        var parent = (ResettableValueTaskSource<T>)obj!;
+                        parent.TrySetException(new OperationCanceledException(cancellationToken));
+                    }, this);
                 }
                 return true;
             }
             if (state == StateFinal)
             {
                 // The task never gets reset once it reaches the final state, thus a ValueTask can be returned repeatedly.
-                valueTask = createValueTask();
+                valueTask = createValueTask(this);
                 return true;
             }
 
@@ -880,23 +899,29 @@ namespace playground
         }
 
         public bool TryGetValueTask(out ValueTask<T> valueTask, CancellationToken cancellationToken = default)
-            => TryGetValueTask(() => new ValueTask<T>(this, _valueTaskSource.Version), out valueTask, cancellationToken);
+            => TryGetValueTask(static parent => new ValueTask<T>(parent, parent._valueTaskSource.Version), out valueTask, cancellationToken);
 
         public bool TryGetValueTask(out ValueTask valueTask, CancellationToken cancellationToken = default)
-            => TryGetValueTask(() => new ValueTask(this, _valueTaskSource.Version), out valueTask, cancellationToken);
+            => TryGetValueTask(static parent => new ValueTask(parent, parent._valueTaskSource.Version), out valueTask, cancellationToken);
 
         public bool TrySetResult(T item, bool final = false)
         {
-            // Awaiting -> Completed
-            // None|Awaiting -> Final
-            // The action that completes the task should never get started without getting the task first except for a final state.
+            // None|Awaiting -> Completed|Final
             // Completion when final is true means that the task will never get reset.
             if (Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateAwaiting) == StateAwaiting ||
-               (final && Interlocked.CompareExchange(ref _state, StateFinal, StateNone) == StateNone))
+                Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateNone) == StateNone)
             {
                 _cancellationRegistration.Dispose();
                 _cancellationRegistration = default;
                 _valueTaskSource.SetResult(item);
+                if (final)
+                {
+                    var taskCompletionSource = Interlocked.CompareExchange(ref _taskCompletionSource, s_completionSentinel, null);
+                    if (taskCompletionSource is not null && taskCompletionSource != s_completionSentinel)
+                    {
+                        taskCompletionSource.SetResult(item);
+                    }
+                }
                 return true;
             }
 
@@ -905,16 +930,22 @@ namespace playground
 
         public bool TrySetException(Exception exception, bool final = false)
         {
-            // Awaiting -> Completed
-            // None|Awaiting -> Final
-            // The action that completes the task should never get started without getting the task first except for a final state.
+            // None|Awaiting -> Completed|Final
             // Completion when final is true means that the task will never get reset.
             if (Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateAwaiting) == StateAwaiting ||
-               (final && Interlocked.CompareExchange(ref _state, StateFinal, StateNone) == StateNone))
+                Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateNone) == StateNone)
             {
                 _cancellationRegistration.Dispose();
                 _cancellationRegistration = default;
                 _valueTaskSource.SetException(exception.StackTrace is null ? ExceptionDispatchInfo.SetCurrentStackTrace(exception) : exception);
+                if (final)
+                {
+                    var taskCompletionSource = Interlocked.CompareExchange(ref _taskCompletionSource, s_completionSentinel, null);
+                    if (taskCompletionSource is not null && taskCompletionSource != s_completionSentinel)
+                    {
+                        taskCompletionSource.SetException(exception.StackTrace is null ? ExceptionDispatchInfo.SetCurrentStackTrace(exception) : exception);
+                    }
+                }
                 return true;
             }
 
@@ -938,6 +969,34 @@ namespace playground
             }
         }
 
+        public ValueTask<T> GetFinalTask()
+        {
+            // Avoid allocating tcs in case we have already finished.
+            if (Volatile.Read(ref _state) == StateFinal)
+            {
+                return new ValueTask<T>(this, _valueTaskSource.Version);
+            }
+
+            // Fast path for already allocated tcs.
+            var taskCompletionSource = Volatile.Read(ref _taskCompletionSource);
+            if (taskCompletionSource is not null)
+            {
+                if (taskCompletionSource == s_completionSentinel)
+                {
+                    return new ValueTask<T>(this, _valueTaskSource.Version);
+                }
+                return new ValueTask<T>(taskCompletionSource.Task);
+            }
+
+            // We might race here so make sure only one shared instance of tcs is created.
+            taskCompletionSource = Interlocked.CompareExchange(ref _taskCompletionSource, new TaskCompletionSource<T>(_valueTaskSource.RunContinuationsAsynchronously), null);
+            if (taskCompletionSource == s_completionSentinel)
+            {
+                return new ValueTask<T>(this, _valueTaskSource.Version);
+            }
+            return new ValueTask<T>(_taskCompletionSource.Task);
+        }
+
         ValueTaskSourceStatus IValueTaskSource<T>.GetStatus(short token)
             => _valueTaskSource.GetStatus(token);
 
@@ -958,3 +1017,70 @@ namespace playground
     }
 }
 
+
+public class Test
+{
+    WeakReference<TaskCompletionSource> wr;
+    private TaskCompletionSource? TCS => wr.TryGetTarget(out var tcs) ? tcs : null;
+
+    public async Task M1()
+    {
+        var tcs = new TaskCompletionSource();
+        var task = Task.Run(async() => {
+            var foo = new Foo(tcs);
+            await foo.PoopAsync();
+            Console.WriteLine(foo);
+        });
+        GC.Collect();
+        tcs.SetResult();
+        await task;
+    }
+
+    public async Task M()
+    {
+        wr = new WeakReference<TaskCompletionSource>(new TaskCompletionSource());
+        var t = TCS;
+        var task = //TestMethod(TCS);
+                   Task.Run(() => TestMethod(t));
+        //GC.Collect(); doesn't seem to change anything
+        Console.WriteLine(Environment.ProcessId);
+        await Task.Delay(TimeSpan.FromSeconds(20)); // So that SetWr gets called
+        GC.Collect();
+        if (!wr.TryGetTarget(out var x))
+        {
+            Console.WriteLine("Disapeared");
+        }
+        else
+        {
+            Console.WriteLine("Alive");
+            TCS.SetResult();
+        }
+        await task;
+    }
+
+    private async Task TestMethod(TaskCompletionSource tcs)
+    {
+        await Task.Yield();
+        var foo = new Foo(tcs);
+        await foo.PoopAsync(); //the same thing with manual DisposeAsync
+        Console.WriteLine(foo);
+    }
+}
+
+public class Foo : IAsyncDisposable
+{
+    private TaskCompletionSource _tcs;
+    public Foo(TaskCompletionSource tcs)
+    {
+        _tcs = tcs;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _tcs.Task;
+    }
+    public async Task PoopAsync()
+    {
+        await _tcs.Task;
+    }
+}
