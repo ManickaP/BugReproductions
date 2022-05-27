@@ -24,7 +24,16 @@ namespace playground
 {
     class Program
     {
-        public static async Task Main()
+        public static void Main25()
+        {
+            short i = 0;
+            while (i < ushort.MaxValue)
+            {
+                Console.WriteLine(i++ + "=" + (ushort)i);
+                Thread.Sleep(1);
+            }
+        }
+        public static async Task Main24()
         {
             var test = new Test();
             await test.M();
@@ -1001,7 +1010,10 @@ namespace playground
             => _valueTaskSource.GetStatus(token);
 
         void IValueTaskSource<T>.OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
-            => _valueTaskSource.OnCompleted(continuation, state, token, flags);
+            {
+                Console.WriteLine("OnCompleted");
+                _valueTaskSource.OnCompleted(continuation, state, token, flags);
+            }
 
         T IValueTaskSource<T>.GetResult(short token)
             => GetResult(token);
@@ -1010,7 +1022,11 @@ namespace playground
             => _valueTaskSource.GetStatus(token);
 
         void IValueTaskSource.OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
-            => _valueTaskSource.OnCompleted(continuation, state, token, flags);
+            {
+                Console.WriteLine("OnCompleted");
+                _valueTaskSource.OnCompleted(continuation, state, token, flags);
+            }
+
 
         void IValueTaskSource.GetResult(short token)
             => GetResult(token);
@@ -1039,9 +1055,9 @@ public class Test
     public async Task M()
     {
         wr = new WeakReference<TaskCompletionSource>(new TaskCompletionSource());
-        var t = TCS;
+        //var t = TCS;
         var task = //TestMethod(TCS);
-                   Task.Run(() => TestMethod(t));
+                   Task.Run(() => TestMethod(TCS));
         //GC.Collect(); doesn't seem to change anything
         Console.WriteLine(Environment.ProcessId);
         await Task.Delay(TimeSpan.FromSeconds(20)); // So that SetWr gets called
@@ -1062,8 +1078,11 @@ public class Test
     {
         await Task.Yield();
         var foo = new Foo(tcs);
+        Console.WriteLine(foo);
+        var gcHandle = GCHandle.Alloc(tcs, GCHandleType.Normal);
         await foo.PoopAsync(); //the same thing with manual DisposeAsync
         Console.WriteLine(foo);
+        gcHandle.Free();
     }
 }
 
