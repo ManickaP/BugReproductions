@@ -24,14 +24,8 @@ namespace playground
 {
     class Program
     {
-        public static void Main25()
+        public static void Main()
         {
-            short i = 0;
-            while (i < ushort.MaxValue)
-            {
-                Console.WriteLine(i++ + "=" + (ushort)i);
-                Thread.Sleep(1);
-            }
         }
         public static async Task Main24()
         {
@@ -59,6 +53,7 @@ namespace playground
                         Console.WriteLine("Booo");
                         break;
                     }
+                    await Task.CompletedTask;
                     //await Task.Yield();
                 }
                 if (!channel.Writer.TryComplete()) {
@@ -287,14 +282,14 @@ namespace playground
                     LocalCertificateSelectionCallback = (object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate? remoteCertificate, string[] acceptableIssuers) =>
                     {
                         Console.WriteLine("Client is selecting a local certificate.");
-                        return null;
+                        return new X509Certificate(new byte[0]);
                     }
                 }
             });
             Console.WriteLine(await client.GetAsync("https://github.com/dotnet/runtime/"));
         }
 
-        static async Task Main15(string[] args)
+        static void Main15(string[] args)
         {
             var x = new ResettableCompletionSource<uint>();
             Console.WriteLine(x.ToString());
@@ -461,7 +456,7 @@ namespace playground
             }
         }
 
-        public static async Task Main11()
+        public static void Main11()
         {
             Console.WriteLine("Exists Certs Name and Location");
             Console.WriteLine("------ ----- -------------------------");
@@ -492,7 +487,7 @@ namespace playground
 
 
         private static string TraceId = null!;
-        public static async Task Main10(string[] args)
+        public static void Main10(string[] args)
         {
             Console.WriteLine(TraceId);
             TraceId = "";
@@ -756,9 +751,9 @@ namespace playground
         // State carried with the waiter for the consumer to use; these aren't used at all in the implementation.
 
         /// <summary>Amount of credit desired by this waiter.</summary>
-        public int Amount;
+        public int Amount = 0;
         /// <summary>Next waiter in a list of waiters.</summary>
-        public CreditWaiter? Next;
+        public CreditWaiter? Next = null;
 
         /// <summary>Initializes a waiter for a credit wait operation.</summary>
         /// <param name="cancellationToken">The cancellation token for this wait operation.</param>
@@ -1036,7 +1031,7 @@ namespace playground
 
 public class Test
 {
-    WeakReference<TaskCompletionSource> wr;
+    WeakReference<TaskCompletionSource> wr = new WeakReference<TaskCompletionSource>(new TaskCompletionSource());
     private TaskCompletionSource? TCS => wr.TryGetTarget(out var tcs) ? tcs : null;
 
     public async Task M1()
@@ -1054,10 +1049,9 @@ public class Test
 
     public async Task M()
     {
-        wr = new WeakReference<TaskCompletionSource>(new TaskCompletionSource());
         //var t = TCS;
         var task = //TestMethod(TCS);
-                   Task.Run(() => TestMethod(TCS));
+                   Task.Run(() => TestMethod(TCS ?? throw new ArgumentNullException()));
         //GC.Collect(); doesn't seem to change anything
         Console.WriteLine(Environment.ProcessId);
         await Task.Delay(TimeSpan.FromSeconds(20)); // So that SetWr gets called
@@ -1069,7 +1063,7 @@ public class Test
         else
         {
             Console.WriteLine("Alive");
-            TCS.SetResult();
+            TCS?.SetResult();
         }
         await task;
     }
