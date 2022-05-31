@@ -24,8 +24,24 @@ namespace playground
 {
     class Program
     {
-        public static void Main()
+        public static void Main25()
         {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            var cancellationToken = cts.Token;
+            var test = new TestStruct()
+            {
+                Value = 100
+            };
+            cancellationToken.UnsafeRegister(static (obj, cancellationToken) =>
+            {
+                var instance = (TestStruct)obj!;
+                Console.WriteLine($"Callback({instance.Value})");
+                instance.Value = 200;
+            }, test);
+            test.Value = 300;
+            Console.WriteLine($"Before({test.Value})");
+            cts.Cancel();
+            Console.WriteLine($"After({test.Value})");
         }
         public static async Task Main24()
         {
@@ -33,12 +49,13 @@ namespace playground
             await test.M();
         }
 
-        public static async Task Main23() {
-            var r = new ResettableValueTaskSource<int>();
-            r.TrySetResult(5);
-            if (r.TryGetValueTask(out ValueTask<int> vt))
+        public static async Task Main() {
+            var r = new ResettableValueTaskSource();
+            r.TrySetResult();
+            if (r.TryGetValueTask(out ValueTask vt))
             {
-                Console.WriteLine(await vt);
+                await vt;
+                Console.WriteLine("a");
             }
             await Main21();
         }
@@ -80,46 +97,78 @@ namespace playground
             Console.WriteLine(await channel.Reader.WaitToReadAsync());
         }
         static async Task Main21() {
-            var rvt = new ResettableValueTaskSource<int>();
-            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out ValueTask<int> vt1));
-            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out ValueTask<int> vt2));
+            var rvt = new ResettableValueTaskSource();
+            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out ValueTask vt1));
+            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out ValueTask vt2));
+            ValueTask vt3 = rvt.GetFinalTask();
+            Console.WriteLine("3 got final: ");
+            ValueTask vt4 = rvt.GetFinalTask();
+            Console.WriteLine("4 got final: ");
             Console.WriteLine("1 completed: " + vt1.IsCompleted);
             Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine("set 100: " + rvt.TrySetResult(100));
-            Console.WriteLine("1 completed: " + vt1.IsCompleted);
-            Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine(await vt1);
-            Console.WriteLine(await vt2);
-            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out vt1));
-            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out vt2));
-            Console.WriteLine("1 completed: " + vt1.IsCompleted);
-            Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine("set 100: " + rvt.TrySetResult(100));
-            Console.WriteLine("1 completed: " + vt1.IsCompleted);
-            Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine(await vt1);
-            Console.WriteLine(await vt2);
-            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out vt1));
-            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out vt2));
-            Console.WriteLine("1 completed: " + vt1.IsCompleted);
-            Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine("set 100: " + rvt.TrySetResult(100));
-            Console.WriteLine("set 200: " + rvt.TrySetResult(200));
-            Console.WriteLine("1 completed: " + vt1.IsCompleted);
-            Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine(await vt1);
-            Console.WriteLine(await vt2);
-            Console.WriteLine("set ex: " + rvt.TrySetException(new Exception(), true));
-            Console.WriteLine("set 50: " + rvt.TrySetResult(50));
-            Console.WriteLine("set 500: " + rvt.TrySetResult(500));
-            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out vt1));
-            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out vt2));
-            Console.WriteLine("1 completed: " + vt1.IsCompleted);
-            Console.WriteLine("2 completed: " + vt2.IsCompleted);
-            Console.WriteLine("3 got: " + rvt.TryGetValueTask(out ValueTask vt3));
-            Console.WriteLine("4 got: " + rvt.TryGetValueTask(out ValueTask vt4));
             Console.WriteLine("3 completed: " + vt3.IsCompleted);
             Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            Console.WriteLine("set: " + rvt.TrySetResult());
+            Console.WriteLine("1 completed: " + vt1.IsCompleted);
+            Console.WriteLine("2 completed: " + vt2.IsCompleted);
+            Console.WriteLine("3 completed: " + vt3.IsCompleted);
+            Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            await vt1;
+            Console.WriteLine("vt1 awaited");
+            await vt2;
+            Console.WriteLine("vt2 awaited");
+            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out vt1));
+            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out vt2));
+            Console.WriteLine("1 completed: " + vt1.IsCompleted);
+            Console.WriteLine("2 completed: " + vt2.IsCompleted);
+            Console.WriteLine("3 completed: " + vt3.IsCompleted);
+            Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            Console.WriteLine("set: " + rvt.TrySetResult());
+            Console.WriteLine("1 completed: " + vt1.IsCompleted);
+            Console.WriteLine("2 completed: " + vt2.IsCompleted);
+            Console.WriteLine("3 completed: " + vt3.IsCompleted);
+            Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            await vt1;
+            Console.WriteLine("vt1 awaited");
+            await vt2;
+            Console.WriteLine("vt2 awaited");
+            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out vt1));
+            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out vt2));
+            ValueTask vt5 = rvt.GetFinalTask();
+            Console.WriteLine("5 got final: ");
+            Console.WriteLine("1 completed: " + vt1.IsCompleted);
+            Console.WriteLine("2 completed: " + vt2.IsCompleted);
+            Console.WriteLine("3 completed: " + vt3.IsCompleted);
+            Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            Console.WriteLine("5 completed: " + vt5.IsCompleted);
+            Console.WriteLine("set: " + rvt.TrySetResult());
+            Console.WriteLine("set: " + rvt.TrySetResult(true));
+            Console.WriteLine("1 completed: " + vt1.IsCompleted);
+            Console.WriteLine("2 completed: " + vt2.IsCompleted);
+            Console.WriteLine("3 completed: " + vt3.IsCompleted);
+            Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            Console.WriteLine("5 completed: " + vt5.IsCompleted);
+            await vt1;
+            Console.WriteLine("vt1 awaited");
+            await vt2;
+            Console.WriteLine("vt2 awaited");
+            Console.WriteLine("set ex: " + rvt.TrySetException(new Exception(), true));
+            Console.WriteLine("set: " + rvt.TrySetResult());
+            Console.WriteLine("set: " + rvt.TrySetResult());
+            Console.WriteLine("1 got: " + rvt.TryGetValueTask(out vt1));
+            Console.WriteLine("2 got: " + rvt.TryGetValueTask(out vt2));
+            Console.WriteLine("1 completed: " + vt1.IsCompleted);
+            Console.WriteLine("2 completed: " + vt2.IsCompleted);
+            Console.WriteLine("3 completed: " + vt3.IsCompleted);
+            Console.WriteLine("4 completed: " + vt4.IsCompleted);
+            Console.WriteLine("5 completed: " + vt5.IsCompleted);
+            ValueTask vt6 = rvt.GetFinalTask();
+            Console.WriteLine("6 got final: ");
+            Console.WriteLine("7 got: " + rvt.TryGetValueTask(out ValueTask vt7));
+            Console.WriteLine("8 got: " + rvt.TryGetValueTask(out ValueTask vt8));
+            Console.WriteLine("6 completed: " + vt6.IsCompleted);
+            Console.WriteLine("7 completed: " + vt7.IsCompleted);
+            Console.WriteLine("8 completed: " + vt8.IsCompleted);
             try
             {
                 await vt1;
@@ -131,7 +180,55 @@ namespace playground
             Console.WriteLine(vt2.IsCompletedSuccessfully);
             try
             {
-                await vt1;
+                await vt2;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught: " + ex);
+            }
+            try
+            {
+                await vt3;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught: " + ex);
+            }
+            try
+            {
+                await vt4;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught: " + ex);
+            }
+            try
+            {
+                await vt5;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught: " + ex);
+            }
+            try
+            {
+                await vt6;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught: " + ex);
+            }
+            try
+            {
+                await vt7;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Caught: " + ex);
+            }
+            try
+            {
+                await vt8;
             }
             catch (Exception ex)
             {
@@ -849,182 +946,309 @@ namespace playground
     }
 
 
-    internal class ResettableValueTaskSource<T> : IValueTaskSource<T>, IValueTaskSource
+    internal class ResettableValueTaskSource : IValueTaskSource
     {
-        private static readonly TaskCompletionSource<T> s_completionSentinel = new TaskCompletionSource<T>();
-        // None -> [TryGetValueTask] -> Awaiting -> [TrySetResult|TrySetException(final: false)] -> Completed -> [GetResult] -> None
-        // None -> [TrySetResult|TrySetException(final: false)] -> Completed -> [GetResult] -> None
+        // None -> [TryGetValueTask] -> Awaiting -> [TrySetResult|TrySetException(final: false)] -> Ready -> [GetResult] -> None
+        // None -> [TrySetResult|TrySetException(final: false)] -> Ready -> [TryGetValueTask] -> [GetResult] -> None
         // None|Awaiting -> [TrySetResult|TrySetException(final: true)] -> Final(never leaves this state)
-        private const int StateNone = 0;
-        private const int StateAwaiting = 1;
-        private const int StateCompleted = 2;
-        private const int StateFinal = 3;
-        private int _state = StateNone;
-        private ManualResetValueTaskSourceCore<T> _valueTaskSource;
+        private enum State
+        {
+            None,
+            Awaiting,
+            Ready,
+            Completed
+        }
+
+        private State _state;
+        private ManualResetValueTaskSourceCore<bool> _valueTaskSource;
         private CancellationTokenRegistration _cancellationRegistration;
-        private TaskCompletionSource<T>? _taskCompletionSource;
+        private GCHandle _keepAlive;
+        private FinalValueTaskSource _finalTaskSource;
 
         public ResettableValueTaskSource(bool runContinuationsAsynchronously = true)
         {
-            _valueTaskSource = new ManualResetValueTaskSourceCore<T>() { RunContinuationsAsynchronously = runContinuationsAsynchronously };
+            _state = State.None;
+            _valueTaskSource = new ManualResetValueTaskSourceCore<bool>() { RunContinuationsAsynchronously = runContinuationsAsynchronously };
             _cancellationRegistration = default;
-            _taskCompletionSource = default;
+            _keepAlive = default;
+
+            _finalTaskSource = new FinalValueTaskSource(runContinuationsAsynchronously);
+
+            // Reset the value task source so that its version doesn't overlap with the final task source.
+            if (_valueTaskSource.Version == _finalTaskSource.Version)
+            {
+                _valueTaskSource.Reset();
+            }
         }
 
-        private bool TryGetValueTask<TValueTask>(Func<ResettableValueTaskSource<T>, TValueTask> createValueTask, out TValueTask valueTask, CancellationToken cancellationToken = default)
-            where TValueTask : struct
+        public bool IsCompleted
         {
-            // None -> Awaiting
-            int state = Interlocked.CompareExchange(ref _state, StateAwaiting, StateNone);
-            if (state == StateNone || state == StateCompleted)
+            get
             {
-                valueTask = createValueTask(this);
-
-                // Register cancellation if the token can be cancelled and the task is not completed yet.
-                if (cancellationToken.CanBeCanceled && state == StateNone)
+                lock (this)
                 {
-                    _cancellationRegistration = cancellationToken.UnsafeRegister(static (obj, cancellationToken) =>
-                    {
-                        var parent = (ResettableValueTaskSource<T>)obj!;
-                        parent.TrySetException(new OperationCanceledException(cancellationToken));
-                    }, this);
+                    return _state == State.Completed;
                 }
-                return true;
             }
-            if (state == StateFinal)
-            {
-                // The task never gets reset once it reaches the final state, thus a ValueTask can be returned repeatedly.
-                valueTask = createValueTask(this);
-                return true;
-            }
-
-            valueTask = default;
-            return false;
         }
 
-        public bool TryGetValueTask(out ValueTask<T> valueTask, CancellationToken cancellationToken = default)
-            => TryGetValueTask(static parent => new ValueTask<T>(parent, parent._valueTaskSource.Version), out valueTask, cancellationToken);
-
-        public bool TryGetValueTask(out ValueTask valueTask, CancellationToken cancellationToken = default)
-            => TryGetValueTask(static parent => new ValueTask(parent, parent._valueTaskSource.Version), out valueTask, cancellationToken);
-
-        public bool TrySetResult(T item, bool final = false)
+        public bool TryGetValueTask(out ValueTask valueTask, object? keepAlive = null, CancellationToken cancellationToken = default)
         {
-            // None|Awaiting -> Completed|Final
-            // Completion when final is true means that the task will never get reset.
-            if (Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateAwaiting) == StateAwaiting ||
-                Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateNone) == StateNone)
+            lock (this)
             {
-                _cancellationRegistration.Dispose();
-                _cancellationRegistration = default;
-                _valueTaskSource.SetResult(item);
-                if (final)
+                // Cancellation might kick off synchronously, re-entering the lock and changing the state to completed.
+                if (_state == State.None)
                 {
-                    var taskCompletionSource = Interlocked.CompareExchange(ref _taskCompletionSource, s_completionSentinel, null);
-                    if (taskCompletionSource is not null && taskCompletionSource != s_completionSentinel)
+                    // Register cancellation if the token can be cancelled and the task is not completed yet.
+                    if (cancellationToken.CanBeCanceled)
                     {
-                        taskCompletionSource.SetResult(item);
+                        _cancellationRegistration = cancellationToken.UnsafeRegister(static (obj, cancellationToken) =>
+                        {
+                            var parent = (ResettableValueTaskSource)obj!;
+                            parent.TrySetException(new OperationCanceledException(cancellationToken));
+                        }, this);
                     }
                 }
-                return true;
-            }
 
-            return false;
+                var state = _state;
+
+                // None: prepare for the actual operation happening and transition to Awaiting.
+                if (state == State.None)
+                {
+                    // Root the object to keep alive if requested.
+                    if (keepAlive is not null)
+                    {
+                        Debug.Assert(!_keepAlive.IsAllocated);
+                        _keepAlive = GCHandle.Alloc(keepAlive);
+                    }
+
+                    _state = State.Awaiting;
+                }
+                // None, Completed, Final: return the current task.
+                if (state == State.None ||
+                    state == State.Ready ||
+                    state == State.Completed)
+                {
+                    valueTask = new ValueTask(this, _valueTaskSource.Version);
+                    return true;
+                }
+
+                // Awaiting: forbidden concurrent call.
+                valueTask = default;
+                return false;
+            }
+        }
+
+        private bool TryComplete(Exception? exception, bool final)
+        {
+            Debug.Assert(Monitor.IsEntered(this));
+            try
+            {
+                var state = _state;
+
+                // None,Awaiting: clean up and finish the task source.
+                if (state == State.Awaiting ||
+                    state == State.None)
+                {
+                    // Dispose the cancellation if registered.
+                    _cancellationRegistration.Dispose();
+                    _cancellationRegistration = default;
+
+                    // Unblock the current task source and in case of a final also the final task source.
+                    if (exception is not null)
+                    {
+                        _valueTaskSource.SetException(exception);
+                    }
+                    else
+                    {
+                        _valueTaskSource.SetResult(final);
+                    }
+                    if (final)
+                    {
+                        _finalTaskSource.TryComplete();
+                        _finalTaskSource.TrySignal(out _);
+                    }
+
+                    _state = final ? State.Completed : State.Ready;
+                    return true;
+                }
+
+                // Final: remember the first final result to set it once the current non-final result gets retrieved.
+                if (final)
+                {
+                    return _finalTaskSource.TryComplete(exception);
+                }
+
+                return false;
+            }
+            finally
+            {
+                // Un-root the the kept alive object in all cases.
+                if (_keepAlive.IsAllocated)
+                {
+                    _keepAlive.Free();
+                }
+            }
+        }
+
+        public bool TrySetResult(bool final = false)
+        {
+            lock (this)
+            {
+                return TryComplete(null, final);
+            }
         }
 
         public bool TrySetException(Exception exception, bool final = false)
         {
-            // None|Awaiting -> Completed|Final
-            // Completion when final is true means that the task will never get reset.
-            if (Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateAwaiting) == StateAwaiting ||
-                Interlocked.CompareExchange(ref _state, final ? StateFinal : StateCompleted, StateNone) == StateNone)
+            // Set up the exception stack strace for the caller.
+            exception = exception.StackTrace is null ? ExceptionDispatchInfo.SetCurrentStackTrace(exception) : exception;
+            lock (this)
             {
-                _cancellationRegistration.Dispose();
-                _cancellationRegistration = default;
-                _valueTaskSource.SetException(exception.StackTrace is null ? ExceptionDispatchInfo.SetCurrentStackTrace(exception) : exception);
-                if (final)
-                {
-                    var taskCompletionSource = Interlocked.CompareExchange(ref _taskCompletionSource, s_completionSentinel, null);
-                    if (taskCompletionSource is not null && taskCompletionSource != s_completionSentinel)
-                    {
-                        taskCompletionSource.SetException(exception.StackTrace is null ? ExceptionDispatchInfo.SetCurrentStackTrace(exception) : exception);
-                    }
-                }
-                return true;
+                return TryComplete(exception, final);
             }
-
-            return false;
         }
 
-        private T GetResult(short token)
+        private void GetResult(short token)
         {
             try
             {
-                return _valueTaskSource.GetResult(token);
+                _valueTaskSource.GetResult(token);
             }
             finally
             {
-                // Completed -> None
-                // Either reset if the task has been completed non-finally or keep it as-is if final, no other states are possible here.
-                if (Interlocked.CompareExchange(ref _state, StateNone, StateCompleted) == StateCompleted)
+                lock (this)
                 {
-                    _valueTaskSource.Reset();
+                    var state = _state;
+
+                    if (state == State.Ready)
+                    {
+                        // Reset the value task source so that its version doesn't overlap with the final task source.
+                        _valueTaskSource.Reset();
+                        if (_valueTaskSource.Version == _finalTaskSource.Version)
+                        {
+                            _valueTaskSource.Reset();
+                        }
+
+                        if (_finalTaskSource.TrySignal(out var exception))
+                        {
+                            if (exception is not null)
+                            {
+                                _valueTaskSource.SetException(exception);
+                            }
+                            else
+                            {
+                                _valueTaskSource.SetResult(true);
+                            }
+                            _state = State.Completed;
+                        }
+                        else
+                        {
+                            _state = State.None;
+                        }
+                    }
                 }
             }
         }
 
-        public ValueTask<T> GetFinalTask()
-        {
-            // Avoid allocating tcs in case we have already finished.
-            if (Volatile.Read(ref _state) == StateFinal)
-            {
-                return new ValueTask<T>(this, _valueTaskSource.Version);
-            }
-
-            // Fast path for already allocated tcs.
-            var taskCompletionSource = Volatile.Read(ref _taskCompletionSource);
-            if (taskCompletionSource is not null)
-            {
-                if (taskCompletionSource == s_completionSentinel)
-                {
-                    return new ValueTask<T>(this, _valueTaskSource.Version);
-                }
-                return new ValueTask<T>(taskCompletionSource.Task);
-            }
-
-            // We might race here so make sure only one shared instance of tcs is created.
-            taskCompletionSource = Interlocked.CompareExchange(ref _taskCompletionSource, new TaskCompletionSource<T>(_valueTaskSource.RunContinuationsAsynchronously), null);
-            if (taskCompletionSource == s_completionSentinel)
-            {
-                return new ValueTask<T>(this, _valueTaskSource.Version);
-            }
-            return new ValueTask<T>(_taskCompletionSource.Task);
-        }
-
-        ValueTaskSourceStatus IValueTaskSource<T>.GetStatus(short token)
-            => _valueTaskSource.GetStatus(token);
-
-        void IValueTaskSource<T>.OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
-            {
-                Console.WriteLine("OnCompleted");
-                _valueTaskSource.OnCompleted(continuation, state, token, flags);
-            }
-
-        T IValueTaskSource<T>.GetResult(short token)
-            => GetResult(token);
+        public ValueTask GetFinalTask() => new ValueTask(this, _finalTaskSource.Version);
 
         ValueTaskSourceStatus IValueTaskSource.GetStatus(short token)
-            => _valueTaskSource.GetStatus(token);
+        {
+            if (token == _finalTaskSource.Version)
+            {
+                return _finalTaskSource.GetStatus(token);
+
+            }
+            else
+            {
+                return _valueTaskSource.GetStatus(token);
+            }
+        }
 
         void IValueTaskSource.OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
+        {
+            if (token == _finalTaskSource.Version)
             {
-                Console.WriteLine("OnCompleted");
+                _finalTaskSource.OnCompleted(continuation, state, token, flags);
+
+            }
+            else
+            {
                 _valueTaskSource.OnCompleted(continuation, state, token, flags);
             }
-
+        }
 
         void IValueTaskSource.GetResult(short token)
-            => GetResult(token);
+        {
+            if (token == _finalTaskSource.Version)
+            {
+                _finalTaskSource.GetResult(token);
+
+            }
+            else
+            {
+                GetResult(token);
+            }
+        }
+
+        private struct FinalValueTaskSource : IValueTaskSource
+        {
+            private ManualResetValueTaskSourceCore<bool> _valueTaskSource;
+            private bool _isCompleted;
+            private Exception? _exception;
+
+            public FinalValueTaskSource(bool runContinuationsAsynchronously = true)
+            {
+                _valueTaskSource = new ManualResetValueTaskSourceCore<bool>() { RunContinuationsAsynchronously = runContinuationsAsynchronously };
+                _isCompleted = false;
+                _exception = null;
+            }
+
+            public short Version => _valueTaskSource.Version;
+
+            public bool TryComplete(Exception? exception = null)
+            {
+                if (_isCompleted)
+                {
+                    return false;
+                }
+
+                _exception = exception;
+                _isCompleted = true;
+                return true;
+            }
+
+            public bool TrySignal(out Exception? exception)
+            {
+                if (!_isCompleted)
+                {
+                    exception = default;
+                    return false;
+                }
+
+                if (_exception is not null)
+                {
+                    _valueTaskSource.SetException(_exception);
+                }
+                else
+                {
+                    _valueTaskSource.SetResult(true);
+                }
+
+                exception = _exception;
+                return true;
+            }
+
+            public ValueTaskSourceStatus GetStatus(short token)
+                => _valueTaskSource.GetStatus(_valueTaskSource.Version);
+
+            public void OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
+                => _valueTaskSource.OnCompleted(continuation, state, token, flags);
+
+            public void GetResult(short token)
+                => _valueTaskSource.GetResult(_valueTaskSource.Version);
+        }
     }
 }
 
@@ -1096,4 +1320,9 @@ public class Foo : IAsyncDisposable
     {
         await _tcs.Task;
     }
+}
+
+public struct TestStruct
+{
+    public int Value;
 }
