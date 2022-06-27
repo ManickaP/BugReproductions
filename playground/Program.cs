@@ -24,6 +24,19 @@ namespace playground
 {
     class Program
     {
+        public static async Task Main()
+        {
+            const string url = "https://httpbin.org/image/jpeg";
+            using var httpClient = new HttpClient();
+            using var response = await httpClient.GetAsync(url);
+            Console.WriteLine($"Content length: {response.Content.Headers.ContentLength}");
+
+            await using var stream = await httpClient.GetStreamAsync(url);
+            Console.WriteLine($"Stream type: {stream.GetType()}");
+            Console.WriteLine($"Stream can seek: {stream.CanSeek}");
+            Console.WriteLine($"Stream length: {stream.Length}");
+        }
+
         public static void Main25()
         {
             CancellationTokenSource cts = new CancellationTokenSource();
@@ -49,7 +62,7 @@ namespace playground
             await test.M();
         }
 
-        public static async Task Main() {
+        public static async Task Main23() {
             var r = new ResettableValueTaskSource();
             r.TrySetResult();
             if (r.TryGetValueTask(out ValueTask vt))
