@@ -13,10 +13,11 @@ namespace socket_test
     {
         static async Task Main(string[] args)
         {
-            //await Task.WhenAll(RunServer(), RunClient());
+            await Task.WhenAll(RunServer(), RunClient());
         }
 
         static readonly TaskCompletionSource<IPEndPoint> serverEndpoint = new TaskCompletionSource<IPEndPoint>();
+        static readonly TaskCompletionSource clientWrite = new TaskCompletionSource();
 
         static async Task RunClient()
         {
@@ -27,14 +28,28 @@ namespace socket_test
             socket.Connect(endpoint);
             Console.WriteLine("Client connected to: " + socket.RemoteEndPoint);
             var stream = new NetworkStream(socket, ownsSocket: true);
-            await stream.WriteAsync(UTF8Encoding.UTF8.GetBytes("Ahoj"));
-            var buffer = new byte[100];
+            for (int i = 0; i < 1_000; ++i)
+            {
+                await stream.WriteAsync(UTF8Encoding.UTF8.GetBytes("Ahoj"));
+            }
+            clientWrite.SetResult();
+            /*try
+            {
+                await stream.ReadAsync(new byte[10]);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }*/
+            socket.Shutdown(SocketShutdown.Both);
+            await stream.DisposeAsync();
+            /*var buffer = new byte[100];
             int readBytes;
             while ((readBytes = await stream.ReadAsync(buffer)) > 0)
             {
                 Console.WriteLine("Client:" + UTF8Encoding.UTF8.GetString(buffer, 0, readBytes));
             }
-            Console.WriteLine("Client:" + readBytes);
+            Console.WriteLine("Client:" + readBytes);*/
         }
         static async Task RunServer()
         {
@@ -44,10 +59,18 @@ namespace socket_test
             serverEndpoint.SetResult(listenSocket.LocalEndPoint as IPEndPoint);
             Console.WriteLine("Server listening on: " + listenSocket.LocalEndPoint);
             var socket = await listenSocket.AcceptAsync().ConfigureAwait(false);
+            socket.NoDelay = true;
+            socket.LingerState = new LingerOption(true, 0);
             var stream = new NetworkStream(socket, ownsSocket: true);
             var buffer = new byte[100];
-            int readBytes = await stream.ReadAsync(buffer);
-            Console.WriteLine("Server:" + UTF8Encoding.UTF8.GetString(buffer, 0, readBytes));
+            int readBytes = 0;
+            do
+            {
+                readBytes = await stream.ReadAsync(buffer);
+                Console.WriteLine($"Server({readBytes}):" + UTF8Encoding.UTF8.GetString(buffer, 0, readBytes));
+                await clientWrite.Task;
+                socket.Close(0);
+            } while (false);//(readBytes > 0);
             stream.Dispose();
         }
     }
