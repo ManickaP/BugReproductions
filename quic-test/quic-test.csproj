@@ -6,10 +6,12 @@
     <RootNamespace>quic_test</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.Net.Quic.dll" />
+    <Reference Include="System.Net.Security.dll" />
   </ItemGroup>
 
   <ItemGroup>

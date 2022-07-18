@@ -13,25 +13,39 @@ X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(cert
 
 var listener = await QuicListener.ListenAsync(new QuicListenerOptions() {
     ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 0),
-    ServerAuthenticationOptions = new SslServerAuthenticationOptions() {
-        ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
-        ServerCertificate = serverCertificate
-    },
-    IdleTimeout = TimeSpan.FromSeconds(5)
+    ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
+    ConnectionOptionsCallback = (_, _, _) =>
+    {
+        var serverOptions = new QuicServerConnectionOptions()
+        {
+            DefaultStreamErrorCode = 12345,
+            IdleTimeout = TimeSpan.FromSeconds(5),
+            ServerAuthenticationOptions = new SslServerAuthenticationOptions
+            {
+                ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
+                ServerCertificate = serverCertificate
+            }
+        };
+        return ValueTask.FromResult(serverOptions);
+    }
 });
 
 var connection = await QuicConnection.ConnectAsync(new QuicClientConnectionOptions(){
+    DefaultStreamErrorCode = 54321,
     ClientAuthenticationOptions = new SslClientAuthenticationOptions() {
         ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
         RemoteCertificateValidationCallback = delegate { return true; }
     },
-    RemoteEndPoint = listener.ListenEndPoint
+    RemoteEndPoint = listener.LocalEndPoint
 });
-await connection.ConnectAsync();
 var serverConnection = await listener.AcceptConnectionAsync();
 
-await connection.CloseAsync(123);
-connection.Dispose();
+var stream = await connection.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
+await stream.WriteAsync(new byte[1]);
+var serverStream = await serverConnection.AcceptInboundStreamAsync();
+
+//await connection.CloseAsync(123);
+await connection.DisposeAsync();
 Thread.Sleep(TimeSpan.FromSeconds(10));
 
 internal sealed class HttpEventListener : EventListener

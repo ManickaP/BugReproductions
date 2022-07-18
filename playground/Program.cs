@@ -26,6 +26,18 @@ namespace playground
     {
         public static async Task Main()
         {
+            var tcs = new TaskCompletionSource();
+            var cts = new CancellationTokenSource();
+            var token = cts.Token;
+            cts.Cancel();
+            //tcs.TrySetCanceled(token);
+            tcs.TrySetException(new OperationCanceledException(token));
+            var x = tcs.Task.Exception;
+;
+        }
+
+        public static async Task Main26()
+        {
             const string url = "https://httpbin.org/image/jpeg";
             using var httpClient = new HttpClient();
             using var response = await httpClient.GetAsync(url);
