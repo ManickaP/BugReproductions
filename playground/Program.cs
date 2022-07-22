@@ -29,6 +29,8 @@ namespace playground
             var tcs = new TaskCompletionSource();
             var cts = new CancellationTokenSource();
             var token = cts.Token;
+            token.UnsafeRegister((_,_) => Console.WriteLine("a"), null);
+            token.UnsafeRegister((_,_) => Console.WriteLine("b"), null);
             cts.Cancel();
             //tcs.TrySetCanceled(token);
             tcs.TrySetException(new OperationCanceledException(token));
