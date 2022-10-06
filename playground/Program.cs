@@ -27,9 +27,9 @@ namespace playground
         public static async Task Main()
         {
             var client = new HttpClient(new HttpClientHandler(){
-                AutomaticDecompression = DecompressionMethods.Brotli
+                AutomaticDecompression = DecompressionMethods.Deflate
             });
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://motherfuckingwebsite.com/");
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/brotli");
             var response = await client.SendAsync(request);
             Console.WriteLine(request);
             Console.WriteLine(response);
