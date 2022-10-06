@@ -30,6 +30,9 @@ namespace interop
         private IntPtr _buffers = IntPtr.Zero;
         private int _count = 0;
 
+        public QuicBuffers() {
+        }
+
         public QUIC_BUFFER* Buffers => (QUIC_BUFFER*)_buffers;
         public int Count => _count;
 

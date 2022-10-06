@@ -26,6 +26,17 @@ namespace playground
     {
         public static async Task Main()
         {
+            var client = new HttpClient(new HttpClientHandler(){
+                AutomaticDecompression = DecompressionMethods.Brotli
+            });
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://motherfuckingwebsite.com/");
+            var response = await client.SendAsync(request);
+            Console.WriteLine(request);
+            Console.WriteLine(response);
+        }
+
+        public static async Task Main27()
+        {
             var tcs = new TaskCompletionSource();
             var cts = new CancellationTokenSource();
             var token = cts.Token;
@@ -35,7 +46,6 @@ namespace playground
             //tcs.TrySetCanceled(token);
             tcs.TrySetException(new OperationCanceledException(token));
             var x = tcs.Task.Exception;
-;
         }
 
         public static async Task Main26()

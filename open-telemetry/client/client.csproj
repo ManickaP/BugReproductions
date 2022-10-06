@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="polly" Version="7.2.3" />
+    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>
 
 </Project>

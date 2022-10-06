@@ -125,7 +125,7 @@ namespace issue_55193
                         .UseQuic(options =>
                         {
                             options.MaxReadBufferSize = maxReadBufferSize;
-                            options.Alpn = "h3-29";
+                            //options.Alpn = "h3-29";
                             options.IdleTimeout = TimeSpan.FromSeconds(20);
                         });
                 });

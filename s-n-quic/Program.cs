@@ -32,7 +32,11 @@ class Program
 
 
 public struct InitTaskCompletionSource {
+
     private TaskCompletionSource? _taskCompletionSource = null;
+
+    public InitTaskCompletionSource() {
+    }
 
     public bool TryInitialize(out ValueTask valueTask) {
         // Firstly checks if the _taskCompletionSource has been initialized to minimize number of wastefully created instances.

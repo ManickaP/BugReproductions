@@ -4,11 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RJCP.SerialPortStream.dll">
-      <HintPath>/home/manicka/Repositories/SerialPortStream/code/bin/Debug/netstandard1.5/RJCP.SerialPortStream.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="4.7.0"/>
   </ItemGroup>
 </Project>
