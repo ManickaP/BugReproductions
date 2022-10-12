@@ -26,13 +26,31 @@ namespace playground
     {
         public static async Task Main()
         {
-            var client = new HttpClient(new HttpClientHandler(){
-                AutomaticDecompression = DecompressionMethods.Deflate
-            });
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/brotli");
+            /*var client = new HttpClient(new HttpClientHandler());
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://httpbin.org/anything")
+            {
+                Content = new MyContent("Ahoooj!")
+            };
             var response = await client.SendAsync(request);
             Console.WriteLine(request);
-            Console.WriteLine(response);
+            Console.WriteLine(response);*/
+            var x = new MyContent("Ahoooj! 2");
+            /*x.CopyTo
+            x.CopyToAsync*/
+            //await x.LoadIntoBufferAsync();
+            await x.CopyToAsync(Stream.Null);
+            await x.CopyToAsync(Stream.Null);
+            //var a = await x.ReadAsByteArrayAsync();
+            //var d = await x.ReadAsStringAsync();
+            var c = await x.ReadAsStreamAsync();
+            var b = x.ReadAsStream();
+            var c2 = await x.ReadAsStreamAsync();
+            var c3 = await x.ReadAsStreamAsync();
+            //var stream = await x.ReadAsStreamAsync(); //true
+            //await x.CopyToAsync(Stream.Null); //false
+            //await x.LoadIntoBufferAsync(); //true
+            //var y = await x.ReadAsStringAsync(); //true
+            //x.CopyTo(Stream.Null, null, default);
         }
 
         public static async Task Main27()
@@ -1362,4 +1380,39 @@ public class Foo : IAsyncDisposable
 public struct TestStruct
 {
     public int Value;
+}
+
+public class MyContent : HttpContent
+{
+    private readonly string _data;
+    public MyContent(string data) {
+        _data = data;
+    }
+    protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+        => stream.WriteAsync(Encoding.UTF8.GetBytes(_data)).AsTask();
+
+    /*protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context, CancellationToken cancellationToken)
+        => stream.WriteAsync(Encoding.UTF8.GetBytes(_data), cancellationToken).AsTask();*/
+
+    protected override bool TryComputeLength(out long length) {
+        length = 0;
+        return false;
+    }
+
+    protected override Stream CreateContentReadStream(CancellationToken cancellationToken)
+    {
+        return new MemoryStream(Encoding.UTF8.GetBytes(_data));
+    }
+    protected override Task<Stream> CreateContentReadStreamAsync()
+    {
+        return Task.FromResult<Stream>(new MemoryStream(Encoding.UTF8.GetBytes(_data)));
+    }
+    protected override Task<Stream> CreateContentReadStreamAsync(CancellationToken cancellationToken)
+    {
+        return base.CreateContentReadStreamAsync(cancellationToken);
+    }
+    protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
+    {
+        base.SerializeToStream(stream, context, cancellationToken);
+    }
 }
