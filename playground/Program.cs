@@ -19,12 +19,37 @@ using System.Diagnostics.Tracing;
 using System.Text;
 using System.Net.Mail;
 using System.IO;
+using System.Net.Quic;
 
 namespace playground
 {
     class Program
     {
         public static async Task Main()
+        {
+            using var httpListener = new HttpEventListener();
+
+            string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
+            X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
+            var listener = await QuicListener.ListenAsync(new QuicListenerOptions
+            {
+                ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 5001),
+                ApplicationProtocols = new List<SslApplicationProtocol>() { new SslApplicationProtocol("h3") },
+                ConnectionOptionsCallback = (_, _, _) => ValueTask.FromResult(new QuicServerConnectionOptions()
+                {
+                    DefaultStreamErrorCode = 456,
+                    DefaultCloseErrorCode = 123,
+                    ServerAuthenticationOptions = new SslServerAuthenticationOptions()
+                    {
+                        ApplicationProtocols = new List<SslApplicationProtocol>() { new SslApplicationProtocol("h3") },
+                        ServerCertificate = serverCertificate
+                    }
+                })
+            });
+            var connection = listener.AcceptConnectionAsync();
+            Console.ReadLine();
+        }
+        public static async Task Main28()
         {
             /*var client = new HttpClient(new HttpClientHandler());
             var request = new HttpRequestMessage(HttpMethod.Post, "https://httpbin.org/anything")

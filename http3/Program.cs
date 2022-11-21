@@ -12,13 +12,15 @@ var client = new HttpClient(new SocketsHttpHandler()
     {
         RemoteCertificateValidationCallback = delegate { return true; }
     }
-})
-{
+});
+/*{
     DefaultRequestVersion = HttpVersion.Version30,
     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-};
-var resp = await client.GetAsync("https://localhost:5001/sendBytes?length=5");
-Console.WriteLine($"status: {resp.StatusCode}, version: {resp.Version}");
+};*/
+var resp = await client.GetAsync("https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types");//("https://localhost:5001/sendBytes?length=5");
+//Console.WriteLine($"status: {resp.StatusCode}, version: {resp.Version}");
+
+Console.WriteLine(resp);
 
 /*internal sealed class HttpEventListener : EventListener
 {
