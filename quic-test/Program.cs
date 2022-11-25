@@ -8,10 +8,106 @@ using System.Text;
 
 using var httpListener = new HttpEventListener();
 
+async Task WorkWithStream(Stream stream)
+{
+    Console.WriteLine("Poo");
+    await using (stream)
+    {
+        byte[] buffer = new byte[1024];
+        int count = 0;
+        int a = 0x010b;
+        while ((count = await stream.ReadAsync(buffer)) > 0)
+        {
+            await stream.WriteAsync(buffer.AsMemory(0, count));
+        }
+    }
+}
+
 string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
 X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
 
-var listener = await QuicListener.ListenAsync(new QuicListenerOptions() {
+bool isRunning = true;
+
+// First, check if QUIC is supported.
+if (!QuicListener.IsSupported)
+{
+    Console.WriteLine("QUIC is not supported, check for presence of libmsquic and support of TLS 1.3.");
+    return;
+}
+
+// We want the same configuration for each incoming connection, so we prepare the connection option upfront and reuse them.
+// This represents the minimal configuration necessary to accept a connection.
+var serverConnectionOptions = new QuicServerConnectionOptions()
+{
+    // Used to abort stream if it's not properly closed by the user.
+    // See https://www.rfc-editor.org/rfc/rfc9000.html#name-application-protocol-error-
+    DefaultStreamErrorCode = 123,
+
+    // Used to close the connection if it's not done by the user.
+    // See https://www.rfc-editor.org/rfc/rfc9000.html#name-application-protocol-error-
+    DefaultCloseErrorCode = 456,
+
+    // Same options as for server side SslStream.
+    ServerAuthenticationOptions = new SslServerAuthenticationOptions
+    {
+        // List of supported application protocols, must be the same or subset of QuicListenerOptions.ApplicationProtocols.
+        ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
+        // Server certificate, it can also be provided via ServerCertificateContext or ServerCertificateSelectionCallback.
+        ServerCertificate = serverCertificate
+    }
+};
+
+// Initialize, configure the listener and start listening.
+var listener = await QuicListener.ListenAsync(new QuicListenerOptions()
+{
+    // Listening endpoint, port 0 means any port.
+    ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 0),
+    // List of all supported application protocols by this listener.
+    ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
+    // Callback to provide options for the incoming connections, it gets once called per each of them.
+    ConnectionOptionsCallback = (_, _, _) => ValueTask.FromResult(serverConnectionOptions)
+});
+
+// Accept and process the connections.
+/*while (isRunning)
+{
+    // Accept will propagate any exceptions that occurred during the connection establishment,
+    // including exceptions thrown from ConnectionOptionsCallback, caused by invalid QuicServerConnectionOptions or TLS handshake failures.
+    var serverConnection = await listener.AcceptConnectionAsync();
+
+    // Process the connection...
+}*/
+
+// When finished, dispose the listener.
+//await listener.DisposeAsync();
+
+var clientConnectionOptions = new QuicClientConnectionOptions()
+{
+    RemoteEndPoint = listener.LocalEndPoint,
+    DefaultStreamErrorCode = 321,
+    DefaultCloseErrorCode = 654,
+    MaxInboundBidirectionalStreams = 1,
+    ClientAuthenticationOptions = new SslClientAuthenticationOptions()
+    {
+        ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
+        RemoteCertificateValidationCallback = delegate { return true; }
+    },
+};
+
+var connection = await QuicConnection.ConnectAsync(clientConnectionOptions);
+//var serverConnection = await listener.AcceptConnectionAsync();
+Console.WriteLine($"Connected {connection.LocalEndPoint} --> {connection.RemoteEndPoint}");
+var outgoingStream = await connection.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
+await WorkWithStream(outgoingStream);
+/*while (isRunning)
+{
+    var incomingStream = await connection.AcceptInboundStreamAsync();
+}*/
+await connection.CloseAsync(789);
+await connection.DisposeAsync();
+
+
+/*var listener = await QuicListener.ListenAsync(new QuicListenerOptions() {
     ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 0),
     ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
     ConnectionOptionsCallback = (_, _, _) =>
@@ -19,6 +115,7 @@ var listener = await QuicListener.ListenAsync(new QuicListenerOptions() {
         var serverOptions = new QuicServerConnectionOptions()
         {
             DefaultStreamErrorCode = 12345,
+            DefaultCloseErrorCode = 123456,
             IdleTimeout = TimeSpan.FromSeconds(5),
             ServerAuthenticationOptions = new SslServerAuthenticationOptions
             {
@@ -30,8 +127,10 @@ var listener = await QuicListener.ListenAsync(new QuicListenerOptions() {
     }
 });
 
+
 var connection = await QuicConnection.ConnectAsync(new QuicClientConnectionOptions(){
     DefaultStreamErrorCode = 54321,
+    DefaultCloseErrorCode = 654321,
     ClientAuthenticationOptions = new SslClientAuthenticationOptions() {
         ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
         RemoteCertificateValidationCallback = delegate { return true; }
@@ -46,7 +145,7 @@ var serverStream = await serverConnection.AcceptInboundStreamAsync();
 
 //await connection.CloseAsync(123);
 await connection.DisposeAsync();
-Thread.Sleep(TimeSpan.FromSeconds(10));
+Thread.Sleep(TimeSpan.FromSeconds(10));*/
 
 internal sealed class HttpEventListener : EventListener
 {

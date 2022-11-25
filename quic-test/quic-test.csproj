@@ -10,11 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="System.Net.Quic.dll" />
-    <Reference Include="System.Net.Security.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="*.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
