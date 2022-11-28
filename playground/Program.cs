@@ -27,6 +27,46 @@ namespace playground
     {
         public static async Task Main()
         {
+            var serverAuthentication = new NegotiateAuthentication(new NegotiateAuthenticationServerOptions { });
+            var clientAuthentication = new NegotiateAuthentication(
+                new NegotiateAuthenticationClientOptions
+                {
+                    Package = "Negotiate",
+                    Credential = CredentialCache.DefaultNetworkCredentials,
+                    TargetName = "HTTP/localhost",
+                    RequiredProtectionLevel = ProtectionLevel.Sign
+                });
+
+            string? serverBlob = null;
+            while (!clientAuthentication.IsAuthenticated)
+            {
+                // Client produces the authentication challenge, or response to server's challenge
+                string? clientBlob = clientAuthentication.GetOutgoingBlob(serverBlob, out var clientStatusCode);
+                if (clientStatusCode == NegotiateAuthenticationStatusCode.ContinueNeeded)
+                {
+                    // Send the client blob to the server; this would normally happen over a network
+                    Console.WriteLine($"C: {clientBlob}");
+                    serverBlob = serverAuthentication.GetOutgoingBlob(clientBlob, out var serverStatusCode);
+                    if (serverStatusCode != NegotiateAuthenticationStatusCode.Completed &&
+                        serverStatusCode != NegotiateAuthenticationStatusCode.ContinueNeeded)
+                    {
+                        Console.WriteLine($"Server authentication failed with status code {serverStatusCode}");
+                        break;
+                    }
+                    Console.WriteLine($"S: {serverBlob}");
+                }
+                else
+                {
+                    Console.WriteLine(
+                        clientStatusCode == NegotiateAuthenticationStatusCode.Completed ?
+                        "Successfully authenticated" :
+                        $"Authentication failed with status code {clientStatusCode}");
+                    break;
+                }
+            }
+        }
+        public static async Task Main29()
+        {
             using var httpListener = new HttpEventListener();
 
             string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
