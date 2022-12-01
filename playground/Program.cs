@@ -40,8 +40,11 @@ namespace playground
                 var y = new NTAccount(x.Substring(x.LastIndexOf('\\')+1));
                 var z = y.Translate(typeof(SecurityIdentifier));
             }*/
-            //string path = @"C:\windows\system32\notepad.exe";
-            FileVersionInfo info = FileVersionInfo.GetVersionInfo(args[1]);
+            string path = @"C:\Windows\System32\cmd.exe";
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(path);
+            Console.WriteLine(info.FileVersion);
+            path = @"C:\Users\mapichov\repositories\cmd.exe";
+            info = FileVersionInfo.GetVersionInfo(path);
             Console.WriteLine(info.FileVersion);
             /*_ = Parallel.For(0, 5, r =>
             {
