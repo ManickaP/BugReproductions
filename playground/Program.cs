@@ -30,7 +30,49 @@ namespace playground
 {
     class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main() {
+            using var testListener = new HttpEventListener();
+
+            foreach (var x in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
+                Console.WriteLine($"{x} - {x.AddressFamily}");
+            }
+
+            string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
+            X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
+
+            var ll = await QuicListener.ListenAsync(new QuicListenerOptions(){
+                ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 0),
+                ApplicationProtocols = new List<SslApplicationProtocol>() { new SslApplicationProtocol("h3") },
+                ConnectionOptionsCallback = (_, _, _) => {
+                    Console.WriteLine("a");
+                    return ValueTask.FromResult(new QuicServerConnectionOptions() {
+                        DefaultStreamErrorCode = 456,
+                        DefaultCloseErrorCode = 123,
+                        ServerAuthenticationOptions = new SslServerAuthenticationOptions() {
+                            ApplicationProtocols = new List<SslApplicationProtocol>() { new SslApplicationProtocol("h3") },
+                            ServerCertificate = serverCertificate
+                        }
+                    });
+                }
+            });
+
+            var vt = ll.AcceptConnectionAsync();
+            Console.WriteLine("b");
+
+            var c = await QuicConnection.ConnectAsync(new QuicClientConnectionOptions() {
+                RemoteEndPoint = new DnsEndPoint(Dns.GetHostName(), ll.LocalEndPoint.Port),
+                    DefaultStreamErrorCode = 456,
+                    DefaultCloseErrorCode = 123,
+                    ClientAuthenticationOptions = new SslClientAuthenticationOptions() {
+                        RemoteCertificateValidationCallback = (_,_,_,_) => true,
+                        ApplicationProtocols = new List<SslApplicationProtocol>() { new SslApplicationProtocol("h3") },
+                    }
+            });
+            Console.WriteLine("c");
+            await vt;
+            Console.WriteLine("d");
+        }
+        public static void Main32(string[] args)
         {
             /*string userName = "";
             var mos = new ManagementObjectSearcher("root\\cimv2", "select UserName from Win32_ComputerSystem");
