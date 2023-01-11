@@ -34,7 +34,7 @@ namespace playground
             using var testListener = new HttpEventListener();
 
             foreach (var x in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
-                Console.WriteLine($"{x} - {x.AddressFamily}");
+                Console.WriteLine($"{x} - {x.AddressFamily} {Dns.GetHostName()}");
             }
 
             string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
@@ -59,8 +59,10 @@ namespace playground
             var vt = ll.AcceptConnectionAsync();
             Console.WriteLine("b");
 
+            var address = Dns.GetHostEntry(Dns.GetHostName()).AddressList[4];
+            Console.WriteLine($"Connecting to {address}");
             var c = await QuicConnection.ConnectAsync(new QuicClientConnectionOptions() {
-                RemoteEndPoint = new DnsEndPoint(Dns.GetHostName(), ll.LocalEndPoint.Port),
+                RemoteEndPoint = new IPEndPoint(address, ll.LocalEndPoint.Port),//ll.LocalEndPoint,//new DnsEndPoint(Dns.GetHostName(), ll.LocalEndPoint.Port),
                     DefaultStreamErrorCode = 456,
                     DefaultCloseErrorCode = 123,
                     ClientAuthenticationOptions = new SslClientAuthenticationOptions() {
