@@ -8,7 +8,6 @@
             "name": "playground",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
             "program": "${workspaceFolder}/playground/bin/Debug/net7.0/playground.dll",
             "args": [],
             "cwd": "${workspaceFolder}/playground",
@@ -25,11 +24,11 @@
                     "mode": "loadAllButExcluded",
                     "excludedModules": []
                 }
-            },
+            }
+        }, {
             "name": "quic-test",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
             "program": "${workspaceFolder}/quic-test/bin/Debug/net7.0/quic-test.dll",
             "args": [],
             "cwd": "${workspaceFolder}/quic-test",
@@ -47,8 +46,28 @@
                     "excludedModules": []
                 }
             },
-        },
-        {
+        }, {
+            "name": "quic-test-6.0",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/quic-test-6.0/bin/Debug/net6.0/quic-test-6.0.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/quic-test-6.0",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "requireExactSource": false,
+            "suppressJITOptimizations": true,
+            "enableStepFiltering": false,
+            "symbolOptions": {
+                "searchMicrosoftSymbolServer": true,
+                "searchNuGetOrgSymbolServer": true,
+                "moduleFilter": {
+                    "mode": "loadAllButExcluded",
+                    "excludedModules": []
+                }
+            },
+        }, {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"

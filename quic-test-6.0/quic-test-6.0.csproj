@@ -8,8 +8,12 @@
     <Nullable>enable</Nullable>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System.Net.Quic.dll" />
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+    <!--Reference Include="linux/System.Net.Quic.dll" /-->
+    <Reference Include="/usr/share/dotnet/shared/Microsoft.NETCore.App/6.0.11/System.Net.Quic.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+    <Reference Include="win\System.Net.Quic.dll" />
     <!--Reference Include="C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.13\System.Net.Quic.dll" /-->
   </ItemGroup>
 
