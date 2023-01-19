@@ -1,91 +1,90 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bench", "bench\bench.csproj", "{697DA789-B65A-4E93-B477-98100219722F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bench", "bench\bench.csproj", "{697DA789-B65A-4E93-B477-98100219722F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client_test", "client_test\client_test.csproj", "{3552F82B-7E52-4A29-A238-0D37A0E7D44F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client_test", "client_test\client_test.csproj", "{3552F82B-7E52-4A29-A238-0D37A0E7D44F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cookie_test", "cookie_test\cookie_test.csproj", "{01FE563E-649F-49F8-8632-017B68515AF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cookie_test", "cookie_test\cookie_test.csproj", "{01FE563E-649F-49F8-8632-017B68515AF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "h2c_inf_loop", "h2c_inf_loop\h2c_inf_loop.csproj", "{482C49C7-E857-494C-AE99-4BA20E72239C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "h2c_inf_loop", "h2c_inf_loop\h2c_inf_loop.csproj", "{482C49C7-E857-494C-AE99-4BA20E72239C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "http2_deadlock", "http2_deadlock\http2_deadlock.csproj", "{DC34BAB4-A37E-449B-9388-FF6919A77AD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "http2_deadlock", "http2_deadlock\http2_deadlock.csproj", "{DC34BAB4-A37E-449B-9388-FF6919A77AD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "http_client_activity_missing", "http_client_activity_missing\http_client_activity_missing.csproj", "{4CE2E858-CFA5-4E88-AD60-A8BC1C7EC1F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "http_client_activity_missing", "http_client_activity_missing\http_client_activity_missing.csproj", "{4CE2E858-CFA5-4E88-AD60-A8BC1C7EC1F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_22048", "issue_22048\issue_22048.csproj", "{47169A4A-D024-4F17-A89C-4559319F7A56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_22048", "issue_22048\issue_22048.csproj", "{47169A4A-D024-4F17-A89C-4559319F7A56}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "issue_32611", "issue_32611", "{B7984E3F-4338-4FD4-853C-BB5E4FB54C14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_32611_benchmark", "issue_32611\Benchmarks\issue_32611_benchmark.csproj", "{251A06E6-EA8A-4AEB-B38D-669E623CF0C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_32611_benchmark", "issue_32611\Benchmarks\issue_32611_benchmark.csproj", "{251A06E6-EA8A-4AEB-B38D-669E623CF0C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_32611_csharp", "issue_32611\CSharpTests\issue_32611_csharp.csproj", "{F2989961-8E90-471D-A7D6-86886EB2905F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_32611_csharp", "issue_32611\CSharpTests\issue_32611_csharp.csproj", "{F2989961-8E90-471D-A7D6-86886EB2905F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_38494", "issue_38494\issue_38494.csproj", "{402F2690-6716-4BB1-985D-2454F3C97B5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_38494", "issue_38494\issue_38494.csproj", "{402F2690-6716-4BB1-985D-2454F3C97B5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_55193", "issue_55193\issue_55193.csproj", "{B3219DE9-389A-4B0F-A677-392F61925A3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_55193", "issue_55193\issue_55193.csproj", "{B3219DE9-389A-4B0F-A677-392F61925A3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_687", "issue_687\issue_687.csproj", "{4DA99FBA-4770-4D78-A2A0-3E967C6D29C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_687", "issue_687\issue_687.csproj", "{4DA99FBA-4770-4D78-A2A0-3E967C6D29C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kestrel_test", "kestrel_test\kestrel_test.csproj", "{F5FFDE91-C8FD-4794-A8B5-300181D023F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "kestrel_test", "kestrel_test\kestrel_test.csproj", "{F5FFDE91-C8FD-4794-A8B5-300181D023F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "playground", "playground\playground.csproj", "{0C3C72E6-41D6-4F81-99E6-D464DB895C45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "playground", "playground\playground.csproj", "{0C3C72E6-41D6-4F81-99E6-D464DB895C45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rent_buffer_loh", "rent_buffer_loh\rent_buffer_loh.csproj", "{A4EDF2C9-ED8C-44ED-A588-CFE6BA450470}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rent_buffer_loh", "rent_buffer_loh\rent_buffer_loh.csproj", "{A4EDF2C9-ED8C-44ED-A588-CFE6BA450470}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "socket_test", "socket_test\socket_test.csproj", "{08370C69-7292-4859-AC98-9FE060C3359E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "socket_test", "socket_test\socket_test.csproj", "{08370C69-7292-4859-AC98-9FE060C3359E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcp_listener_test", "tcp_listener_test\tcp_listener_test.csproj", "{07757E98-D147-4FB8-89DE-F09C9A644380}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcp_listener_test", "tcp_listener_test\tcp_listener_test.csproj", "{07757E98-D147-4FB8-89DE-F09C9A644380}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "trim_test", "trim_test\trim_test.csproj", "{F99CC9F7-9A9A-415B-B904-EA8E2DC42A03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "trim_test", "trim_test\trim_test.csproj", "{F99CC9F7-9A9A-415B-B904-EA8E2DC42A03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue_57656", "issue_57656\issue_57656.csproj", "{0BB2BB9A-1B03-413C-8ED7-0B6874B2B4C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "issue_57656", "issue_57656\issue_57656.csproj", "{0BB2BB9A-1B03-413C-8ED7-0B6874B2B4C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "http3", "http3\http3.csproj", "{9E0065AD-3B56-4F0C-873D-140D7C2AAA86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "http3", "http3\http3.csproj", "{9E0065AD-3B56-4F0C-873D-140D7C2AAA86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "diagnostics", "diagnostics\diagnostics.csproj", "{3503CE44-E807-43C5-A85C-DFDFBB99B843}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "diagnostics", "diagnostics\diagnostics.csproj", "{3503CE44-E807-43C5-A85C-DFDFBB99B843}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client_pool", "client_pool\client_pool.csproj", "{989EB447-01DE-4470-A936-79CEFC9936E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client_pool", "client_pool\client_pool.csproj", "{989EB447-01DE-4470-A936-79CEFC9936E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "timer_test", "timer_test\timer_test.csproj", "{FAC8354C-EF3F-4236-A26F-5BCB956CCEBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "timer_test", "timer_test\timer_test.csproj", "{FAC8354C-EF3F-4236-A26F-5BCB956CCEBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "load_dll_test", "load_dll_test\load_dll_test.csproj", "{2EAC12B4-4661-4AB5-9FAB-0EE07FF95D79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "load_dll_test", "load_dll_test\load_dll_test.csproj", "{2EAC12B4-4661-4AB5-9FAB-0EE07FF95D79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stress-test", "stress-test\stress-test.csproj", "{8B955B97-BA0C-4A4E-AFA8-92A5E2468330}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "stress-test", "stress-test\stress-test.csproj", "{8B955B97-BA0C-4A4E-AFA8-92A5E2468330}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "parallel-kill", "parallel-kill\parallel-kill.csproj", "{20B4E468-A54E-4C50-8D87-C1C75C366DE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "parallel-kill", "parallel-kill\parallel-kill.csproj", "{20B4E468-A54E-4C50-8D87-C1C75C366DE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "reuse-request", "reuse-request\reuse-request.csproj", "{451D3614-D086-450A-80A1-54CFCD812913}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "reuse-request", "reuse-request\reuse-request.csproj", "{451D3614-D086-450A-80A1-54CFCD812913}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "http2-server", "http2-server\http2-server.csproj", "{3FDC2D50-05D6-434D-9E25-2EDB76DEC5F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "http2-server", "http2-server\http2-server.csproj", "{3FDC2D50-05D6-434D-9E25-2EDB76DEC5F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "http2-client", "http2-client\http2-client.csproj", "{B88B523A-E6B1-475C-AFE4-6FE2B407FAB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "http2-client", "http2-client\http2-client.csproj", "{B88B523A-E6B1-475C-AFE4-6FE2B407FAB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "web-playground", "web-playground\web-playground.csproj", "{9C814CB8-2662-4856-A114-08AB72CE623D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "web-playground", "web-playground\web-playground.csproj", "{9C814CB8-2662-4856-A114-08AB72CE623D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "http-listener", "http-listener\http-listener.csproj", "{4356CE36-6074-43A6-97C5-89662BFB4237}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "http-listener", "http-listener\http-listener.csproj", "{4356CE36-6074-43A6-97C5-89662BFB4237}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "interop", "interop\interop.csproj", "{23612B96-D24C-4B3D-A980-DAB9EF2A4AB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "interop", "interop\interop.csproj", "{23612B96-D24C-4B3D-A980-DAB9EF2A4AB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s-n-quic", "s-n-quic\s-n-quic.csproj", "{CFC3CA68-6A97-4A49-8C4D-73B7E0FC45CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "s-n-quic", "s-n-quic\s-n-quic.csproj", "{CFC3CA68-6A97-4A49-8C4D-73B7E0FC45CA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "open-telemetry", "open-telemetry", "{1E7B526B-CFAE-4E3F-8E81-4D260F9BC0FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server", "open-telemetry\server\server.csproj", "{C81C9BED-7CB1-400B-934B-5B8050BBF5AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "server", "open-telemetry\server\server.csproj", "{C81C9BED-7CB1-400B-934B-5B8050BBF5AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client", "open-telemetry\client\client.csproj", "{D6D42BD0-E184-484F-9243-E0EF2987A9D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "client", "open-telemetry\client\client.csproj", "{D6D42BD0-E184-484F-9243-E0EF2987A9D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quic-test", "quic-test\quic-test.csproj", "{45235380-47F9-43E4-AAA1-AB23F0BACA45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "quic-test", "quic-test\quic-test.csproj", "{45235380-47F9-43E4-AAA1-AB23F0BACA45}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "quic-test-6.0", "quic-test-6.0\quic-test-6.0.csproj", "{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{697DA789-B65A-4E93-B477-98100219722F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -232,11 +231,21 @@ Global
 		{45235380-47F9-43E4-AAA1-AB23F0BACA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45235380-47F9-43E4-AAA1-AB23F0BACA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45235380-47F9-43E4-AAA1-AB23F0BACA45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{251A06E6-EA8A-4AEB-B38D-669E623CF0C4} = {B7984E3F-4338-4FD4-853C-BB5E4FB54C14}
 		{F2989961-8E90-471D-A7D6-86886EB2905F} = {B7984E3F-4338-4FD4-853C-BB5E4FB54C14}
 		{C81C9BED-7CB1-400B-934B-5B8050BBF5AC} = {1E7B526B-CFAE-4E3F-8E81-4D260F9BC0FC}
 		{D6D42BD0-E184-484F-9243-E0EF2987A9D0} = {1E7B526B-CFAE-4E3F-8E81-4D260F9BC0FC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {149BF6DC-E6FE-416D-928F-C27EDE665A35}
 	EndGlobalSection
 EndGlobal
