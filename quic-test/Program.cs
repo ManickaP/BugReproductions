@@ -58,7 +58,7 @@ var serverConnectionOptions = new QuicServerConnectionOptions()
 };
 
 // Initialize, configure the listener and start listening.
-var listener = await QuicListener.ListenAsync(new QuicListenerOptions()
+await using var listener = await QuicListener.ListenAsync(new QuicListenerOptions()
 {
     // Listening endpoint, port 0 means any port.
     ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 0),
@@ -68,18 +68,26 @@ var listener = await QuicListener.ListenAsync(new QuicListenerOptions()
     ConnectionOptionsCallback = (_, _, _) => ValueTask.FromResult(serverConnectionOptions)
 });
 
-// Accept and process the connections.
-/*while (isRunning)
-{
-    // Accept will propagate any exceptions that occurred during the connection establishment,
-    // including exceptions thrown from ConnectionOptionsCallback, caused by invalid QuicServerConnectionOptions or TLS handshake failures.
-    var serverConnection = await listener.AcceptConnectionAsync();
-
-    // Process the connection...
-}*/
-
-// When finished, dispose the listener.
-//await listener.DisposeAsync();
+async ValueTask RunServer() {
+    // Accept and process the connections.
+    //while (isRunning)
+    {
+        // Accept will propagate any exceptions that occurred during the connection establishment,
+        // including exceptions thrown from ConnectionOptionsCallback, caused by invalid QuicServerConnectionOptions or TLS handshake failures.
+        await using var serverConnection = await listener.AcceptConnectionAsync();
+        using var stream = await serverConnection.AcceptInboundStreamAsync();
+        while (true) {
+            try {
+                await stream.WriteAsync(new byte[10]);
+                await Task.Delay(100);
+            } catch (QuicException ex) when (ex.QuicError == QuicError.StreamAborted) {
+                Console.WriteLine($"Stream {stream} aborted: {ex.Message}");
+                break;
+            }
+        }
+    }
+}
+var serverTask = RunServer();
 
 var clientConnectionOptions = new QuicClientConnectionOptions()
 {
@@ -98,13 +106,23 @@ var connection = await QuicConnection.ConnectAsync(clientConnectionOptions);
 //var serverConnection = await listener.AcceptConnectionAsync();
 Console.WriteLine($"Connected {connection.LocalEndPoint} --> {connection.RemoteEndPoint}");
 var outgoingStream = await connection.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
-await WorkWithStream(outgoingStream);
+await outgoingStream.WriteAsync(new byte[1]);
+
+var buffer = new byte[100];
+await outgoingStream.ReadAsync(buffer);
+outgoingStream.Dispose();
+
+//await WorkWithStream(outgoingStream);
 /*while (isRunning)
 {
     var incomingStream = await connection.AcceptInboundStreamAsync();
 }*/
 await connection.CloseAsync(789);
 await connection.DisposeAsync();
+
+await serverTask;
+
+await Task.Delay(2000);
 
 
 /*var listener = await QuicListener.ListenAsync(new QuicListenerOptions() {
@@ -161,7 +179,7 @@ internal sealed class HttpEventListener : EventListener
 
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
-        var sb = new StringBuilder().Append($"{eventData.TimeStamp:HH:mm:ss.fffffff}[{eventData.EventName}]{eventData.ActivityId}.{eventData.RelatedActivityId} ");
+        var sb = new StringBuilder().Append($"{eventData.TimeStamp:HH:mm:ss.fffffff}[{eventData.EventName}] ");
         for (int i = 0; i < eventData.Payload?.Count; i++)
         {
             if (i > 0)

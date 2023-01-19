@@ -13,6 +13,7 @@
     <Content Include="*.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Reference Include="/home/manicka/repositories/runtime/artifacts/bin/System.Net.Quic/Release/net7.0-linux/System.Net.Quic.dll" />
   </ItemGroup>
 
 </Project>
