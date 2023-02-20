@@ -26,6 +26,8 @@ using System.Management;
 using System.Security.Principal;
 using System.Runtime.Versioning;
 
+#pragma warning disable CA2252
+
 namespace playground
 {
     class Program
