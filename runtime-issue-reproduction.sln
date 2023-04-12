@@ -81,6 +81,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "quic-test", "quic-test\quic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "quic-test-6.0", "quic-test-6.0\quic-test-6.0.csproj", "{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "playground-2", "playground-2\playground-2.csproj", "{D13D0E2E-7695-48B4-A492-C51AA343AAB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -235,6 +237,10 @@ Global
 		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEF0D2CB-66A9-4A14-AE8A-7F5A6D57A426}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D13D0E2E-7695-48B4-A492-C51AA343AAB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D13D0E2E-7695-48B4-A492-C51AA343AAB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D13D0E2E-7695-48B4-A492-C51AA343AAB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D13D0E2E-7695-48B4-A492-C51AA343AAB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,20 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>quic_test</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>playground_2</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
-    <NoWarn>CA2252</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="*.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Reference Include="/home/manicka/repositories/runtime/artifacts/bin/System.Net.Quic/Release/net7.0-linux/System.Net.Quic.dll" />
   </ItemGroup>
 
 </Project>
