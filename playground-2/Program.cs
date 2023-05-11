@@ -7,7 +7,9 @@ using System.Security.Cryptography.X509Certificates;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
-using var testListener = new HttpEventListener();
+Console.WriteLine(await new HttpClient().GetAsync("https://httpstat.us/400"));
+
+//using var testListener = new HttpEventListener();
 
 string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
 X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
