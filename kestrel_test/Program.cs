@@ -18,9 +18,9 @@ namespace kestrel_test
     {
         public static void Main(string[] args)
         {
-            var listener = new HttpEventListener();
+            //var listener = new HttpEventListener();
             CreateHostBuilder(args).Build().Run();
-            listener.Dispose();
+            //listener.Dispose();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

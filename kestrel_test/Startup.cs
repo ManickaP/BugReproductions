@@ -17,7 +17,7 @@ namespace kestrel_test
     public class Startup
     {
         private static readonly Random Random = new Random(123456);
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -57,6 +57,10 @@ namespace kestrel_test
                     {
                         ArrayPool<byte>.Shared.Return(byteArray);
                     }
+                });
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Hello World " + context.Request.Protocol.ToString());
                 });
                 endpoints.MapGet("/sleepFor", async context =>
                 {
