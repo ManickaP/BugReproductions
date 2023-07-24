@@ -7,73 +7,70 @@ using System.Net.Security;
 
 var cert = CreateSelfSignedCertificate();
 
-var listener = await QuicListener.ListenAsync(new QuicListenerOptions
+await using var listener = await QuicListener.ListenAsync(new QuicListenerOptions
 {
     ApplicationProtocols = new List<SslApplicationProtocol>
     {
         new SslApplicationProtocol("test")
     },
     ListenEndPoint = IPEndPoint.Parse("127.0.0.1:19999"),
-    ConnectionOptionsCallback = (con, hello, token) => ValueTask.FromResult(new QuicServerConnectionOptions
+    ConnectionOptionsCallback = (con, hello, token) =>
     {
-        DefaultStreamErrorCode = 123456,
-        DefaultCloseErrorCode = 654321,
-        ServerAuthenticationOptions = new SslServerAuthenticationOptions
+        Console.WriteLine("Called!");
+        return ValueTask.FromResult(new QuicServerConnectionOptions
         {
-            ApplicationProtocols = new List<SslApplicationProtocol>
+            DefaultStreamErrorCode = 123456,
+            DefaultCloseErrorCode = 654321,
+            ServerAuthenticationOptions = new SslServerAuthenticationOptions
             {
-                new SslApplicationProtocol("test")
+                ApplicationProtocols = new List<SslApplicationProtocol>
+                {
+                    new SslApplicationProtocol("test")
+                },
+                ServerCertificate = cert,
+                RemoteCertificateValidationCallback = (sender, chain, certificate, errors) => true
             },
-            ServerCertificate = cert,
-            ClientCertificateRequired = false,
-            RemoteCertificateValidationCallback = (sender, chain, certificate, errors) => true
-        },
-    }),
+        });
+    },
 });
 
 
 _ = Task.Run(async () =>
 {
-    Console.WriteLine("a1");
-    var con = await listener.AcceptConnectionAsync();
-    Console.WriteLine("a2");
-    var stream = await con.AcceptInboundStreamAsync();
-    Console.WriteLine("a3");
+    await using var con = await listener.AcceptConnectionAsync();
+    await using var stream = await con.AcceptInboundStreamAsync();
     var reader = new StreamReader(stream);
     while (true)
     {
         var data = await reader.ReadLineAsync();
-        Console.WriteLine("a4");
         Console.WriteLine(data);
-        await stream.WriteAsync(Encoding.UTF8.GetBytes("World"));
+        await stream.WriteAsync(Encoding.UTF8.GetBytes("World\n"));
     }
 });
 
 try
 {
-    var value = await QuicConnection.ConnectAsync(new QuicClientConnectionOptions
+
+    var options = new QuicClientConnectionOptions
     {
         RemoteEndPoint = IPEndPoint.Parse("127.0.0.1:19999"),
         DefaultCloseErrorCode = 789,
         DefaultStreamErrorCode = 987,
         ClientAuthenticationOptions = new SslClientAuthenticationOptions
         {
-            ClientCertificates = new X509CertificateCollection { cert },
             ApplicationProtocols = new List<SslApplicationProtocol>
             {
                 new SslApplicationProtocol("test")
             },
+            ClientCertificates = new X509CertificateCollection { cert },
             TargetHost = "localhost",
             RemoteCertificateValidationCallback = (sender, chain, certificate, errors) => true
         }
-    });
-    Console.WriteLine("b1");
-    var st = await value.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
-    Console.WriteLine("b2");
+    };
+    await using var value = await QuicConnection.ConnectAsync(options);
+    await using var st = await value.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
     await st.WriteAsync(Encoding.UTF8.GetBytes("hello\n"));
-    Console.WriteLine("b3");
-    using var reader = new StreamReader(st);
-    Console.WriteLine("b4");
+    var reader = new StreamReader(st);
     Console.WriteLine(await reader.ReadLineAsync());
 }
 catch (Exception e)
