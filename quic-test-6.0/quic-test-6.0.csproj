@@ -8,6 +8,11 @@
     <Nullable>enable</Nullable>
     <EnablePreviewFeatures>true</EnablePreviewFeatures>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="*.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
     <!--Reference Include="linux/System.Net.Quic.dll" /-->
     <Reference Include="/usr/share/dotnet/shared/Microsoft.NETCore.App/6.0.11/System.Net.Quic.dll" />
