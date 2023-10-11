@@ -25,6 +25,7 @@ using System.Security.Authentication;
 using System.Management;
 using System.Security.Principal;
 using System.Runtime.Versioning;
+using System.CodeDom;
 
 #pragma warning disable CA2252
 
@@ -32,6 +33,10 @@ namespace playground;
 
 partial class Program
 {
+    public static async Task Main() {
+        var client = new HttpClient();
+        Console.WriteLine(await client.GetAsync("https://webapi.developers.erstegroup.com/api/csas/sandbox/v1/sandbox-idp"));
+    }
     public static async Task Main33() {
         using var testListener = new HttpEventListener();
 
@@ -1678,7 +1683,7 @@ partial class Program
         handle.Release();
         x.Print("3");
     }
-    public static void Main() {
+    public static void Main00() {
         Test();
     }
 }
