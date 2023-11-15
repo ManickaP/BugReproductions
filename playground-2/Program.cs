@@ -9,7 +9,41 @@ using System.Security.Cryptography.X509Certificates;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
-unsafe {
+
+var x = new X()
+{
+    Y = new Y()
+    {
+        Value = 6
+    }
+};
+Console.WriteLine(x.Y.Value);
+x.Y.Value = 7;
+Console.WriteLine(x.Y.Value);
+ref Y y = ref x.Y;
+y.Value = 10;
+Console.WriteLine(x.Y.Value);
+x.Y = y;
+Console.WriteLine(x.Y.Value);
+x.Y = new Y() {
+    Value = x.Y.Value + 1
+};
+Console.WriteLine(x.Y.Value);
+x.Y = x.Y with { Value = x.Y.Value + 1 };
+Console.WriteLine(x.Y.Value);
+
+public class X
+{
+    private Y y;
+    public ref Y Y { get { return ref y;} }
+}
+public struct Y
+{
+    public int Value { get; set; } = 5;
+    public Y()
+    {}
+}
+/*unsafe {
     void* pointer = NativeMemory.AllocZeroed(5);
     Console.WriteLine("p :" + (nint)pointer);
     void* original = (void*)Interlocked.Exchange(ref *(nint*)&pointer, 0);
@@ -18,7 +52,7 @@ unsafe {
     original = (void*)Interlocked.Exchange(ref *(nint*)&pointer, IntPtr.Zero);
     Console.WriteLine("o2:" + (nint)original);
     Console.WriteLine("p2:" + (nint)pointer);
-}
+}*/
 /*
 Console.WriteLine(await new HttpClient().GetAsync("https://httpstat.us/400"));
 
