@@ -5,10 +5,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
-
 
 var x = new X()
 {
@@ -43,6 +43,43 @@ public struct Y
     public Y()
     {}
 }
+
+/*//var x = await client.PostAsync("http://localhost:5000", new MyContent());
+//var x = await client.GetAsync("http://localhost:5000/");
+//var str = await x.Content.ReadAsStringAsync();
+
+var client = new HttpClient();
+HttpResponseMessage x = await client.GetAsync("http://localhost:5000/sendBytes?length=4097", HttpCompletionOption.ResponseHeadersRead);
+Console.WriteLine(x);
+var stream = await x.Content.ReadAsStreamAsync();
+Console.WriteLine(stream.GetType());
+
+stream = await client.GetStreamAsync("http://localhost:5000/sendBytes?length=4097");
+Console.WriteLine(stream.GetType());
+
+var invoker = new HttpMessageInvoker(new HttpClientHandler());
+x = await invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/sendBytes?length=4097"), default);
+Console.WriteLine(x);
+stream = await x.Content.ReadAsStreamAsync();
+Console.WriteLine(stream.GetType());
+
+
+class MyContent : HttpContent
+{
+    protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+    {
+        await stream.WriteAsync(new byte[4097]);
+        await Task.Delay(5_000);
+        throw new Exception("Manicka");
+    }
+
+    protected override bool TryComputeLength(out long length)
+    {
+        length = 4097;
+        return true;
+    }
+}*/
+
 /*unsafe {
     void* pointer = NativeMemory.AllocZeroed(5);
     Console.WriteLine("p :" + (nint)pointer);
@@ -53,6 +90,20 @@ public struct Y
     Console.WriteLine("o2:" + (nint)original);
     Console.WriteLine("p2:" + (nint)pointer);
 }*/
+
+/*var request = (HttpWebRequest)WebRequest.Create("https://httpbin.org/post"); // exact URL is irrelevant because request never gets that far
+
+request.AllowWriteStreamBuffering = false;
+request.Method = "POST";
+
+using (var requestStream = request.GetRequestStream())
+{
+    byte[] buffer = Encoding.UTF8.GetBytes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+
+    for (int megabyte = 0; megabyte < 2; megabyte++)
+        requestStream.Write(buffer, 0, buffer.Length);
+}
+Console.WriteLine(new StreamReader(request.GetResponse().GetResponseStream()).ReadToEnd());*/
 /*
 Console.WriteLine(await new HttpClient().GetAsync("https://httpstat.us/400"));
 

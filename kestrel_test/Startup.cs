@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +37,21 @@ namespace kestrel_test
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapPost("/", async context =>
+                {
+                    Console.WriteLine("POST /");
+                    try
+                    {
+                        using var streamReader = new StreamReader(context.Request.Body, Encoding.UTF8);
+                        var requestContent = await streamReader.ReadToEndAsync();
+                        Console.WriteLine(requestContent);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Manicka: {e}");
+                        throw;
+                    }
+                });
                 endpoints.MapPost("/postFormUrlEncodedContent", async context =>
                 {
                     using var streamReader = new StreamReader(context.Request.Body, Encoding.UTF8);
@@ -60,7 +76,8 @@ namespace kestrel_test
                 });
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello World " + context.Request.Protocol.ToString());
+                    //context.Response.Headers.ContentType = "application/json; charset=utf-32";
+                    await context.Response.Body.WriteAsync(Encoding.UTF32.GetBytes("žřý"));
                 });
                 endpoints.MapGet("/sleepFor", async context =>
                 {

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <RootNamespace>blog_post_code</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <EnablePreviewFeatures>true</EnablePreviewFeatures>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+</Project>
