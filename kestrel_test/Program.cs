@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -37,7 +39,7 @@ namespace kestrel_test
                         {
                             using (RSA rsa = RSA.Create())
                             {
-                                var certReq = new CertificateRequest("CN=contoso.com", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                                var certReq = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                                 certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
                                 certReq.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new Oid("1.3.6.1.5.5.7.3.1") }, false));
                                 certReq.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, false));
@@ -48,6 +50,9 @@ namespace kestrel_test
                                 }
                                 listenOptions.UseHttps(cert);
                             }
+                            /*string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
+                            X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
+                            listenOptions.UseHttps(serverCertificate);*/
                             listenOptions.Protocols = HttpProtocols.Http3;
                         });
                     });
