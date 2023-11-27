@@ -91,6 +91,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "issue-93340", "issue-93340\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blog-post-code", "blog-post-code\blog-post-code.csproj", "{54EC9CE5-61D8-4125-B0D9-5ADF8C1DAFA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "quic-client", "quic-client\quic-client.csproj", "{CE986038-ADE0-4BF6-9198-CB1B21A5A6BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -265,6 +267,10 @@ Global
 		{54EC9CE5-61D8-4125-B0D9-5ADF8C1DAFA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54EC9CE5-61D8-4125-B0D9-5ADF8C1DAFA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54EC9CE5-61D8-4125-B0D9-5ADF8C1DAFA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE986038-ADE0-4BF6-9198-CB1B21A5A6BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE986038-ADE0-4BF6-9198-CB1B21A5A6BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE986038-ADE0-4BF6-9198-CB1B21A5A6BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE986038-ADE0-4BF6-9198-CB1B21A5A6BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -20,7 +20,6 @@ IPEndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 12346);
 SocketAddress receivedAddress = endpoint.Serialize();
 SocketAddress address = endpoint.Serialize();
 
-server.Bind(endpoint);
 
 ValueTask<int> receiveTask = server.ReceiveFromAsync(buffer, SocketFlags.None, receivedAddress);
 await client.SendToAsync(message, SocketFlags.None, address);
@@ -33,8 +32,63 @@ SocketReceiveFromResult result = await receiveTask2;
 
 Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, result.ReceivedBytes) + " from " + result.RemoteEndPoint);
 
-/*using HttpClient client = new HttpClient();
-await client.GetAsync("https://httpbin.org/");*/
+
+/*IPNetwork ipNet = new IPNetwork(new IPAddress(new byte[] { 127, 0, 0, 0 }), 8);
+IPAddress ip1 = new IPAddress(new byte[] { 255, 0, 0, 1 });
+IPAddress ip2 = new IPAddress(new byte[] { 127, 0, 0, 10 });
+Console.WriteLine($"{ip1} {(ipNet.Contains(ip1) ? "belongs" : "doesn't belong")} to {ipNet}");
+Console.WriteLine($"{ip2} {(ipNet.Contains(ip2) ? "belongs" : "doesn't belong")} to {ipNet}");*/
+
+/*
+IPNetwork ipNet = IPNetwork.Parse("2a01:110:8012::/96");
+IPAddress ip1 = IPAddress.Parse("2a01:110:8012::1742:4244");
+IPAddress ip2 = IPAddress.Parse("2a01:110:8012:1010:914e:2451:16ff:ffff");
+Console.WriteLine($"{ip1} {(ipNet.Contains(ip1) ? "belongs" : "doesn't belong")} to {ipNet}");
+Console.WriteLine($"{ip2} {(ipNet.Contains(ip2) ? "belongs" : "doesn't belong")} to {ipNet}");
+*/
+
+using HttpClient httpClient = new HttpClient();
+
+// Handling problems with the server:
+try
+{
+    using HttpResponseMessage response =
+        await httpClient.GetAsync("https://testserver", HttpCompletionOption.ResponseHeadersRead);
+    using Stream responseStream = await response.Content.ReadAsStreamAsync();
+    // Process responseStream ...
+}
+catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.NameResolutionError)
+{
+    Console.WriteLine($"Unknown host: {e}");
+    // --> Try different hostname.
+}
+catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.ConnectionError)
+{
+    Console.WriteLine($"Server unreachable: {e}");
+    // --> Try different server.
+}
+catch (HttpIOException e) when (e.HttpRequestError == HttpRequestError.InvalidResponse)
+{
+    Console.WriteLine($"Mangled responses: {e}");
+    // --> Block list server.
+}
+
+// Handling problems with HTTP version selection:
+try
+{
+    using HttpResponseMessage response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://testserver")
+    {
+        Version = HttpVersion.Version20,
+        VersionPolicy = HttpVersionPolicy.RequestVersionExact
+    }, HttpCompletionOption.ResponseHeadersRead);
+    using Stream responseStream = await response.Content.ReadAsStreamAsync();
+    // Process responseStream ...
+}
+catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.VersionNegotiationError)
+{
+    Console.WriteLine($"HTTP version is not supported: {e}");
+    // Try with different HTTP version.
+}
 
 /*SocketsHttpHandler handler = new SocketsHttpHandler();
 handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
