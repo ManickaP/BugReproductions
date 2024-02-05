@@ -10,6 +10,19 @@ using System.Text;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
+FtpWebRequest myWebRequest = (FtpWebRequest)WebRequest.Create("ftp://ftp.dlptest.com/\r \nDELE test");
+myWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
+myWebRequest.UseBinary = true;
+myWebRequest.Credentials = new NetworkCredential("dlpuser", "rNrKYTX9g7z3RgJRmxWuGHbeu");
+
+FtpWebResponse ftpWebResponse = (FtpWebResponse)myWebRequest.GetResponse();
+StreamReader streamReader = new StreamReader(ftpWebResponse.GetResponseStream());
+Console.WriteLine(streamReader.ReadToEnd());
+
+streamReader.Close();
+ftpWebResponse.Close();
+var uri = new Uri("ftp://ftp.dlptest.com/\r \nDELE test");
+
 var x = new X()
 {
     Y = new Y()

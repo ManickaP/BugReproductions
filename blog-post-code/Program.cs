@@ -8,10 +8,89 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-Console.WriteLine("Hello, World!");
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
+using System.Diagnostics.Tracing;
+using System.Net;
 
+Console.WriteLine(Environment.ProcessId);
+//Console.ReadKey();
 
-Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+using var ipLoggingListener = new IPLoggingListener();
+using HttpClient client = new();
+
+// Send requests in parallel.
+await Parallel.ForAsync(0, 10, async (i, ct) =>
+{
+    // Initialize the async local so that it can be populated by "RequestHeadersStart" event handler.
+    RequestInfo info = RequestInfo.Current;
+    using var response = await client.GetAsync("https://testserver");
+    Console.WriteLine($"Response {response.StatusCode} handled by connection {info.ConnectionId} at {info.RemoteEndPoint}");
+    
+    // Process response...
+});
+
+internal sealed class RequestInfo
+{
+    private static readonly AsyncLocal<RequestInfo> _asyncLocal = new();
+    public static RequestInfo Current => _asyncLocal.Value ??= new();
+
+    public string? RemoteEndPoint;
+    public long? ConnectionId;
+}
+
+internal sealed class IPLoggingListener : EventListener
+{
+    private static readonly ConcurrentDictionary<long, string> s_connection2Endpoint = new ConcurrentDictionary<long, string>();
+
+    private const int ConnectionEstablished_ConnectionIdIndex = 2;
+    private const int ConnectionEstablished_EndPointIndex = 6;
+    private const int ConnectionClosed_ConnectionIdIndex = 2;
+    private const int RequestHeadersStart_ConnectionIdIndex = 0;
+
+    protected override void OnEventSourceCreated(EventSource eventSource)
+    {
+        if (eventSource.Name == "System.Net.Http")
+        {
+            EnableEvents(eventSource, EventLevel.LogAlways);
+        }
+    }
+
+    protected override void OnEventWritten(EventWrittenEventArgs eventData)
+    {
+        ReadOnlyCollection<object?>? payload = eventData.Payload;
+        if (payload == null) return;
+
+        // Remember connection data.
+        if (eventData.EventName == "ConnectionEstablished")
+        {
+            long connectionId = (long)payload[ConnectionEstablished_ConnectionIdIndex]!;
+            string? endPoint = (string?)payload[ConnectionEstablished_EndPointIndex];
+            if (endPoint != null)
+            {
+                Console.WriteLine($"Connection {connectionId} at {endPoint}");
+                s_connection2Endpoint.TryAdd(connectionId, endPoint);
+            }
+        }
+        else if (eventData.EventName == "ConnectionClosed")
+        {
+            long connectionId = (long)payload[ConnectionClosed_ConnectionIdIndex]!;
+            s_connection2Endpoint.TryRemove(connectionId, out _);
+        }
+        // Populate the async local RequestInfo with data from "ConnectionEstablished" event.
+        else if (eventData.EventName == "RequestHeadersStart")
+        {
+            long connectionId = (long)payload[RequestHeadersStart_ConnectionIdIndex]!;
+            if (s_connection2Endpoint.TryGetValue(connectionId, out string? remoteEp))
+            {
+                RequestInfo.Current.RemoteEndPoint = remoteEp;
+                RequestInfo.Current.ConnectionId = connectionId;
+            }
+        }
+    }
+}
+
+/*Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 byte[] message = Encoding.UTF8.GetBytes("Hello world!");
 byte[] buffer = new byte[1024];
@@ -30,7 +109,7 @@ Task<SocketReceiveFromResult> receiveTask2 = server.ReceiveFromAsync(buffer, Soc
 await client.SendToAsync(message, SocketFlags.None, endpoint);
 SocketReceiveFromResult result = await receiveTask2;
 
-Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, result.ReceivedBytes) + " from " + result.RemoteEndPoint);
+Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, result.ReceivedBytes) + " from " + result.RemoteEndPoint);*/
 
 
 /*IPNetwork ipNet = new IPNetwork(new IPAddress(new byte[] { 127, 0, 0, 0 }), 8);
@@ -47,7 +126,7 @@ Console.WriteLine($"{ip1} {(ipNet.Contains(ip1) ? "belongs" : "doesn't belong")}
 Console.WriteLine($"{ip2} {(ipNet.Contains(ip2) ? "belongs" : "doesn't belong")} to {ipNet}");
 */
 
-using HttpClient httpClient = new HttpClient();
+/*using HttpClient httpClient = new HttpClient();
 
 // Handling problems with the server:
 try
@@ -88,7 +167,7 @@ catch (HttpRequestException e) when (e.HttpRequestError == HttpRequestError.Vers
 {
     Console.WriteLine($"HTTP version is not supported: {e}");
     // Try with different HTTP version.
-}
+}*/
 
 /*SocketsHttpHandler handler = new SocketsHttpHandler();
 handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
