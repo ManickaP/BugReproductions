@@ -6,11 +6,28 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Web;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
-FtpWebRequest myWebRequest = (FtpWebRequest)WebRequest.Create("ftp://ftp.dlptest.com/\r \nDELE test");
+//inputstring
+var queryString = "_return_fields%2b=extattrs&name%3a=somename.somedomain.local";
+Console.WriteLine($"Query string input: {queryString}");
+//parse
+var nameValues = HttpUtility.ParseQueryString(queryString);
+
+//show paring decodes the name part
+foreach (var key in nameValues.AllKeys)
+{
+    Console.WriteLine($"Key: {key} => Value: {nameValues[key]}");
+}
+
+//call tostring to make the namevalues to query string
+
+Console.WriteLine($"Query string output: {nameValues.ToString()}");
+
+/*FtpWebRequest myWebRequest = (FtpWebRequest)WebRequest.Create("ftp://ftp.dlptest.com/\r \nDELE test");
 myWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
 myWebRequest.UseBinary = true;
 myWebRequest.Credentials = new NetworkCredential("dlpuser", "rNrKYTX9g7z3RgJRmxWuGHbeu");
@@ -21,9 +38,9 @@ Console.WriteLine(streamReader.ReadToEnd());
 
 streamReader.Close();
 ftpWebResponse.Close();
-var uri = new Uri("ftp://ftp.dlptest.com/\r \nDELE test");
+var uri = new Uri("ftp://ftp.dlptest.com/\r \nDELE test");*/
 
-var x = new X()
+/*var x = new X()
 {
     Y = new Y()
     {
@@ -55,7 +72,7 @@ public struct Y
     public int Value { get; set; } = 5;
     public Y()
     {}
-}
+}*/
 
 /*//var x = await client.PostAsync("http://localhost:5000", new MyContent());
 //var x = await client.GetAsync("http://localhost:5000/");
