@@ -4,6 +4,7 @@ using System.Net.Security;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Web;
@@ -11,7 +12,74 @@ using System.Web;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
-//inputstring
+var client = new HttpClient(new SocketsHttpHandler()
+{
+    SslOptions = new SslClientAuthenticationOptions()
+    {
+        RemoteCertificateValidationCallback = delegate { return true; }
+    }
+})
+{
+    DefaultRequestVersion = HttpVersion.Version30,
+    DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
+};
+
+using var response = await client.GetAsync("https://localhost:5000/stream", HttpCompletionOption.ResponseHeadersRead);
+using var stream = response.Content.ReadAsStream();
+while (true)
+{
+    await Task.Delay(100);
+    if (Random.Shared.Next(3) == 0)
+    {
+        var buff = new byte[64*1024];
+        var length = await stream.ReadAsync(buff);
+        if (length == 0)
+        {
+            break;
+        }
+        Console.WriteLine(Convert.ToHexString(buff, 0, length));
+    }
+    var b = stream.ReadByte();
+    if (b == -1)
+    {
+        break;
+    }
+    else
+    {
+        Console.WriteLine($"0x{b:X2}");
+    }
+}
+
+/*Console.WriteLine("\r\nExists Certs Name and Location");
+Console.WriteLine("------ ----- -------------------------");
+
+foreach (StoreLocation storeLocation in (StoreLocation[])Enum.GetValues(typeof(StoreLocation)))
+{
+    foreach (StoreName storeName in (StoreName[])Enum.GetValues(typeof(StoreName)))
+    {
+        X509Store store = new X509Store(storeName, storeLocation);
+
+        try
+        {
+            store.Open(OpenFlags.OpenExistingOnly);
+
+            Console.WriteLine("Yes    {0,4}  {1}, {2}", store.Certificates.Count, store.Name, store.Location);
+
+
+            foreach (var cert in store.Certificates)
+            {
+                Console.WriteLine("Cert         {0}, {1}", cert.FriendlyName, cert.SubjectName.Name);
+            }
+        }
+        catch (CryptographicException)
+        {
+            Console.WriteLine("No           {0}, {1}", store.Name, store.Location);
+        }
+    }
+    Console.WriteLine();
+}*/
+
+/*//inputstring
 var queryString = "_return_fields%2b=extattrs&name%3a=somename.somedomain.local";
 Console.WriteLine($"Query string input: {queryString}");
 //parse
@@ -25,7 +93,7 @@ foreach (var key in nameValues.AllKeys)
 
 //call tostring to make the namevalues to query string
 
-Console.WriteLine($"Query string output: {nameValues.ToString()}");
+Console.WriteLine($"Query string output: {nameValues.ToString()}");*/
 
 /*FtpWebRequest myWebRequest = (FtpWebRequest)WebRequest.Create("ftp://ftp.dlptest.com/\r \nDELE test");
 myWebRequest.Method = WebRequestMethods.Ftp.ListDirectory;
