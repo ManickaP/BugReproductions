@@ -10,7 +10,7 @@ internal partial class Program
 {
     private static async Task Main(string[] args)
     {
-        //using var quicListener = new QuicEventListener();
+        using var quicListener = new QuicEventListener();
 
         string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
         X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
@@ -51,7 +51,7 @@ internal partial class Program
         });
         await using var serverConnection = await listener.AcceptConnectionAsync();
 
-        await using var localStream = await clientConnection.OpenOutboundStreamAsync(QuicStreamType.Unidirectional);
+        /*await using var localStream = await clientConnection.OpenOutboundStreamAsync(QuicStreamType.Unidirectional);
         await localStream.WriteAsync(new byte[64*1024-1], completeWrites: true);
         //await using var remoteStream = await serverConnection.AcceptInboundStreamAsync();
         //await localStream.ReadAsync(new byte[1]);
@@ -66,6 +66,12 @@ internal partial class Program
             GC.Collect();
             Console.WriteLine($"Memory {GC.GetTotalAllocatedBytes()} for PID {Environment.ProcessId}");
             Thread.Sleep(100);
+        }*/
+
+        for (int i = 0; i < 10; ++i) {
+            await using var localStream = await clientConnection.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
+            await localStream.DisposeAsync();
         }
+
     }
 }
