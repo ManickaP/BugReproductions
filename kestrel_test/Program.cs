@@ -37,7 +37,7 @@ namespace kestrel_test
                     {
                         kestrel.ListenAnyIP(5001, listenOptions =>
                         {
-                            using (RSA rsa = RSA.Create())
+                            /*using (RSA rsa = RSA.Create())
                             {
                                 var certReq = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                                 certReq.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, false));
@@ -49,11 +49,11 @@ namespace kestrel_test
                                     cert = new X509Certificate2(cert.Export(X509ContentType.Pfx));
                                 }
                                 listenOptions.UseHttps(cert);
-                            }
+                            }*/
                             /*string certificatePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "testservereku.contoso.com.pfx");
                             X509Certificate2 serverCertificate = new X509Certificate2(File.ReadAllBytes(certificatePath), "testcertificate", X509KeyStorageFlags.Exportable);
                             listenOptions.UseHttps(serverCertificate);*/
-                            listenOptions.Protocols = HttpProtocols.Http3;
+                            listenOptions.Protocols = HttpProtocols.Http1;
                         });
                     });
                 })
