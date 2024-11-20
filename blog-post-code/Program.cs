@@ -14,9 +14,18 @@ using System.Diagnostics.Tracing;
 using System.Net;
 
 Console.WriteLine(Environment.ProcessId);
+
+
+var client = new HttpClient(new SocketsHttpHandler(){
+    MaxResponseHeadersLength = 64 * 1024,
+});
+
+Console.WriteLine(await client.GetAsync("https://testserver"));
+
+
 //Console.ReadKey();
 
-using var ipLoggingListener = new IPLoggingListener();
+/*using var ipLoggingListener = new IPLoggingListener();
 using HttpClient client = new();
 
 // Send requests in parallel.
@@ -26,7 +35,7 @@ await Parallel.ForAsync(0, 10, async (i, ct) =>
     RequestInfo info = RequestInfo.Current;
     using var response = await client.GetAsync("https://testserver");
     Console.WriteLine($"Response {response.StatusCode} handled by connection {info.ConnectionId} at {info.RemoteEndPoint}");
-    
+
     // Process response...
 });
 
@@ -88,7 +97,7 @@ internal sealed class IPLoggingListener : EventListener
             }
         }
     }
-}
+}*/
 
 /*Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
