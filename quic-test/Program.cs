@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Net;
 using System.Net.Quic;
 using System.Net.Security;
@@ -8,9 +9,11 @@ using System.Text;
 
 internal partial class Program
 {
-    private static async Task Main_(string[] args)
+    private static async Task Main(string[] args)
     {
-        using var quicListener = new QuicEventListener();
+        //using var quicListener = new QuicEventListener();
+
+        AppContext.SetSwitch("System.Net.Quic.DisableConfigurationCache", true);
 
         async Task WorkWithStream(Stream stream)
         {
@@ -43,6 +46,8 @@ internal partial class Program
         // This represents the minimal configuration necessary to accept a connection.
         var serverConnectionOptions = new QuicServerConnectionOptions()
         {
+            MaxInboundBidirectionalStreams = 0,
+            MaxInboundUnidirectionalStreams = 2,
             // Used to abort stream if it's not properly closed by the user.
             // See https://www.rfc-editor.org/rfc/rfc9000.html#name-application-protocol-error-
             DefaultStreamErrorCode = 123,
@@ -80,19 +85,27 @@ internal partial class Program
                 // Accept will propagate any exceptions that occurred during the connection establishment,
                 // including exceptions thrown from ConnectionOptionsCallback, caused by invalid QuicServerConnectionOptions or TLS handshake failures.
                 await using var serverConnection = await listener.AcceptConnectionAsync();
-                using var stream = await serverConnection.AcceptInboundStreamAsync();
                 while (true)
                 {
-                    try
+                    using var stream = await serverConnection.AcceptInboundStreamAsync();
+                    await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
+                    Console.WriteLine($"Processing {stream} ... ");
+                    await Task.Delay(1500);
+                    while (true)
                     {
-                        await stream.WriteAsync(new byte[10]);
-                        await Task.Delay(100);
+                        try
+                        {
+                            var count = await stream.ReadAsync(new byte[10]);
+                            if (count == 0)
+                                break;
+                        }
+                        catch (QuicException ex) when (ex.QuicError == QuicError.StreamAborted)
+                        {
+                            Console.WriteLine($"Stream {stream} aborted: {ex.Message}");
+                            break;
+                        }
                     }
-                    catch (QuicException ex) when (ex.QuicError == QuicError.StreamAborted)
-                    {
-                        Console.WriteLine($"Stream {stream} aborted: {ex.Message}");
-                        break;
-                    }
+                    Console.WriteLine($"Processing {stream} ... done");
                 }
             }
         }
@@ -109,25 +122,35 @@ internal partial class Program
                 ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
                 RemoteCertificateValidationCallback = delegate { return true; }
             },
+            StreamCapacityCallback = (connection, args) =>
+                Console.WriteLine($"{connection} stream capacity increased by: unidi += {args.UnidirectionalIncrement}, bidi += {args.BidirectionalIncrement}")
         };
 
         var connection = await QuicConnection.ConnectAsync(clientConnectionOptions);
         //var serverConnection = await listener.AcceptConnectionAsync();
         Console.WriteLine($"Connected {connection.LocalEndPoint} --> {connection.RemoteEndPoint}");
-        var outgoingStream = await connection.OpenOutboundStreamAsync(QuicStreamType.Bidirectional);
-        await outgoingStream.WriteAsync(new byte[1]);
-
-        var buffer = new byte[100];
-        await outgoingStream.ReadAsync(buffer);
+        var outgoingStream = await connection.OpenOutboundStreamAsync(QuicStreamType.Unidirectional);
+        var outgoingStream2 = await connection.OpenOutboundStreamAsync(QuicStreamType.Unidirectional);
+        var outgoingStream3 = connection.OpenOutboundStreamAsync(QuicStreamType.Unidirectional);
+        var taskStream3 = outgoingStream3.AsTask().ContinueWith(async t =>
+        {
+            Debug.Assert(t.IsCompleted);
+            var str = await t;
+            Console.WriteLine($"Stream {str} opened");
+        });
+        await outgoingStream.WriteAsync(new byte[1], true);
         outgoingStream.Dispose();
+        await outgoingStream2.WriteAsync(new byte[1], true);
+        outgoingStream2.Dispose();
+        Console.WriteLine($"Stream 3 {(taskStream3.IsCompleted ? "opened" : "pending")}");
 
         //await WorkWithStream(outgoingStream);
         /*while (isRunning)
         {
             var incomingStream = await connection.AcceptInboundStreamAsync();
         }*/
-        await connection.CloseAsync(789);
-        await connection.DisposeAsync();
+        /*await connection.CloseAsync(789);
+        await connection.DisposeAsync();*/
 
         await serverTask;
 

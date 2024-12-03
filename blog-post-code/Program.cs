@@ -12,15 +12,43 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Tracing;
 using System.Net;
+using System.Net.ServerSentEvents;
 
 Console.WriteLine(Environment.ProcessId);
 
 
-var client = new HttpClient(new SocketsHttpHandler(){
+/*var client = new HttpClient(new SocketsHttpHandler(){
     MaxResponseHeadersLength = 64 * 1024,
 });
 
-Console.WriteLine(await client.GetAsync("https://testserver"));
+Console.WriteLine(await client.GetAsync("https://testserver"));*/
+
+using var stream = new MemoryStream(Encoding.UTF8.GetBytes(@"
+: stream of integers
+
+data: 123
+id: 1
+retry: 1000
+
+data: 456
+id: 2
+
+data: 789
+id: 3
+
+"));
+
+
+var parser = SseParser.Create(stream, (type, data) =>
+{
+    var str = Encoding.UTF8.GetString(data);
+    return Int32.Parse(str);
+});
+await foreach (var item in parser.EnumerateAsync())
+{
+    Console.WriteLine($"{item.EventType}: {item.Data} [{parser.LastEventId};{parser.ReconnectionInterval}]");
+}
+
 
 
 //Console.ReadKey();
