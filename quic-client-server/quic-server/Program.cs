@@ -45,7 +45,6 @@ var serverConnectionOptions = new QuicServerConnectionOptions()
 };
 
 bool isRunning = true;
-SemaphoreSlim pingpong = new SemaphoreSlim(0, 1);
 
 async ValueTask RecycleServer()
 {
@@ -62,7 +61,6 @@ async ValueTask RecycleServer()
             // Callback to provide options for the incoming connections, it gets once called per each of them.
             ConnectionOptionsCallback = (_, _, _) => ValueTask.FromResult(serverConnectionOptions)
         });
-        pingpong.Release();
         await using var serverConnection = await listener.AcceptConnectionAsync();
         await using var stream = await serverConnection.AcceptInboundStreamAsync();
         var buffer = new byte[1024];
@@ -75,34 +73,10 @@ async ValueTask RecycleServer()
         } while (true);
     }
 }
-async ValueTask RunClients()
-{
-    while (Volatile.Read(ref isRunning))
-    {
-        var clientConnectionOptions = new QuicClientConnectionOptions()
-        {
-            RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, 5000),
-            DefaultStreamErrorCode = 321,
-            DefaultCloseErrorCode = 654,
-            MaxInboundBidirectionalStreams = 1,
-            ClientAuthenticationOptions = new SslClientAuthenticationOptions()
-            {
-                ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http3 },
-                RemoteCertificateValidationCallback = delegate { return true; }
-            }
-        };
-        await pingpong.WaitAsync();
-        await using var connection = await QuicConnection.ConnectAsync(clientConnectionOptions);
-        await using var stream = await connection.OpenOutboundStreamAsync(QuicStreamType.Unidirectional);
-        await stream.WriteAsync(Encoding.UTF8.GetBytes($"Hello from client stream {stream}"));
-    }
-}
 
 var serverTask = RecycleServer();
-var clientTask = RunClients();
 
 Console.WriteLine($"Press any key to stop the server and clients {Environment.ProcessId}.");
 Console.ReadKey();
 isRunning = false;
-await clientTask;
 await serverTask;
